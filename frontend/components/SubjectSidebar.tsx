@@ -1,0 +1,246 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { Plus, Check, Trash2, Pencil, Loader2, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { apiClient } from '@/lib/api';
+
+export interface Subject {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: string;
+}
+
+const PRESET_COLORS = [
+  '#6d28d9', // violet
+  '#2563eb', // blue
+  '#059669', // emerald
+  '#d97706', // amber
+  '#dc2626', // red
+  '#7c3aed', // purple
+  '#0891b2', // cyan
+  '#be185d', // pink
+];
+
+interface SubjectSidebarProps {
+  activeSubjectId: string | null;
+  onSelect: (subject: Subject) => void;
+}
+
+export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProps) {
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
+
+  useEffect(() => {
+    if (showForm) inputRef.current?.focus();
+  }, [showForm]);
+
+  async function fetchSubjects() {
+    setLoading(true);
+    try {
+      const data = await apiClient<Subject[]>('/subjects');
+      setSubjects(data);
+      if (data.length > 0 && !activeSubjectId) {
+        onSelect(data[0]);
+      }
+    } catch {
+      // silently fail — user sees empty state
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newName.trim()) return;
+    setCreating(true);
+    try {
+      const subject = await apiClient<Subject>('/subjects', {
+        method: 'POST',
+        body: JSON.stringify({ name: newName.trim(), color: newColor }),
+      });
+      setSubjects((prev) => [...prev, subject]);
+      setNewName('');
+      setShowForm(false);
+      onSelect(subject);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleRename(id: string) {
+    if (!editName.trim()) {
+      setEditingId(null);
+      return;
+    }
+    try {
+      const updated = await apiClient<Subject>(`/subjects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name: editName.trim() }),
+      });
+      setSubjects((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    } finally {
+      setEditingId(null);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await apiClient(`/subjects/${id}`, { method: 'DELETE' });
+      const remaining = subjects.filter((s) => s.id !== id);
+      setSubjects(remaining);
+      if (activeSubjectId === id) {
+        onSelect(remaining[0] ?? null!);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return (
+    <aside className="flex w-56 shrink-0 flex-col gap-1 pr-4 border-r border-border min-h-[400px]">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Subjects
+        </span>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-accent transition-colors"
+          title="New subject"
+        >
+          <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </div>
+
+      {/* Create form */}
+      {showForm && (
+        <form onSubmit={handleCreate} className="mb-2 space-y-2 animate-fade-in">
+          <Input
+            ref={inputRef}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Subject name…"
+            maxLength={80}
+            disabled={creating}
+          />
+          <div className="flex items-center gap-1 flex-wrap">
+            {PRESET_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setNewColor(c)}
+                className={cn(
+                  'h-5 w-5 rounded-full border-2 transition-transform',
+                  newColor === c ? 'border-foreground scale-110' : 'border-transparent',
+                )}
+                style={{ backgroundColor: c }}
+                title={c}
+              />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" className="flex-1 gap-1" disabled={creating || !newName.trim()}>
+              {creating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              Add
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => { setShowForm(false); setNewName(''); }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* Subject list */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading…
+        </div>
+      ) : subjects.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-8 text-center">
+          <BookOpen className="h-8 w-8 text-muted-foreground/40" />
+          <p className="text-xs text-muted-foreground">No subjects yet.<br />Create one above.</p>
+        </div>
+      ) : (
+        <ul className="space-y-0.5">
+          {subjects.map((subject) => (
+            <li key={subject.id}>
+              {editingId === subject.id ? (
+                <div className="flex items-center gap-1 px-2 py-1">
+                  <Input
+                    autoFocus
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onBlur={() => handleRename(subject.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleRename(subject.id);
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    className="h-7 text-xs"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    'group flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer transition-colors text-sm',
+                    activeSubjectId === subject.id
+                      ? 'bg-accent font-medium'
+                      : 'hover:bg-accent/60 text-muted-foreground hover:text-foreground',
+                  )}
+                  onClick={() => onSelect(subject)}
+                >
+                  <span
+                    className="h-2.5 w-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: subject.color }}
+                  />
+                  <span className="flex-1 truncate">{subject.name}</span>
+                  <div className="hidden group-hover:flex items-center gap-0.5">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingId(subject.id);
+                        setEditName(subject.name);
+                      }}
+                      className="p-0.5 rounded hover:bg-background/80"
+                      title="Rename"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(subject.id);
+                      }}
+                      className="p-0.5 rounded hover:bg-destructive/20 hover:text-destructive"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </aside>
+  );
+}
