@@ -17,8 +17,8 @@ type UploadState = 'idle' | 'dragging' | 'uploading' | 'notes' | 'quiz' | 'done'
 
 const STEPS = [
   { key: 'uploading', label: 'Parsing & chunking document…' },
-  { key: 'notes',     label: 'Generating notes with Gemini…' },
-  { key: 'quiz',      label: 'Generating quiz with Gemini…' },
+  { key: 'notes',     label: 'Generating notes with Groq…' },
+  { key: 'quiz',      label: 'Generating quiz with Groq…' },
 ] as const;
 
 export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {

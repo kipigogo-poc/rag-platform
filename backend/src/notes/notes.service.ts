@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DocumentsService } from '../documents/documents.service';
 import { GenerateNotesDto } from './dto/generate-notes.dto';
 import { Notes } from './interfaces/notes.interface';
+import { callGroq } from '../common/groq';
 
 const NOTES_PROMPT = (topic: string, context: string) => `
 You are an expert academic note-taker. Using ONLY the content provided below, generate comprehensive structured study notes.
@@ -31,20 +31,25 @@ Rules:
 
 @Injectable()
 export class NotesService {
-  private readonly genai: GoogleGenerativeAI;
+  private readonly groqApiKey: string;
 
   constructor(
     private readonly config: ConfigService,
     private readonly documentsService: DocumentsService,
   ) {
-    this.genai = new GoogleGenerativeAI(config.get<string>('GEMINI_API_KEY') ?? '');
+    this.groqApiKey = config.get<string>('GROQ_API_KEY') ?? '';
   }
 
   async generateNotes(dto: GenerateNotesDto, userId: string): Promise<Notes> {
+    if (!this.groqApiKey) {
+      throw new InternalServerErrorException(
+        'GROQ_API_KEY is not configured. Get a free key at https://console.groq.com',
+      );
+    }
+
     const topic = dto.topic ?? 'all main topics';
     const isConsolidated = !dto.sessionId;
 
-    // Fetch more chunks when consolidating across multiple documents
     const context = await this.documentsService.retrieveContext(
       topic,
       userId,
@@ -59,23 +64,25 @@ export class NotesService {
       );
     }
 
-    // ── 2. Generate with Gemini ──────────────────────────────────────────────
-    const model = this.genai.getGenerativeModel({
-      model: 'gemini-3.5-flash',
-      generationConfig: { temperature: 0.3, responseMimeType: 'application/json' },
-    });
+    let raw: string;
+    try {
+      raw = await callGroq(
+        this.groqApiKey,
+        [{ role: 'user', content: NOTES_PROMPT(topic, context) }],
+        { temperature: 0.3, jsonMode: true },
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new InternalServerErrorException(`Groq error: ${msg}`);
+    }
 
-    const result = await model.generateContent(NOTES_PROMPT(topic, context));
-    const raw = result.response.text();
-
-    // ── 3. Parse JSON ────────────────────────────────────────────────────────
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON object in response');
       return JSON.parse(jsonMatch[0]) as Notes;
     } catch {
       throw new InternalServerErrorException(
-        'Gemini returned malformed JSON for notes. Please try again.',
+        'Groq returned malformed JSON for notes. Please try again.',
       );
     }
   }

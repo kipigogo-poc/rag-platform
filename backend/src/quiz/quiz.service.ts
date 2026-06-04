@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DocumentsService } from '../documents/documents.service';
 import { GenerateQuizDto } from './dto/generate-quiz.dto';
 import { Quiz } from './interfaces/quiz.interface';
+import { callGroq } from '../common/groq';
 
 const QUIZ_PROMPT = (topic: string, count: number, context: string) => `
 You are an expert quiz creator. Using ONLY the content provided below, generate exactly ${count} multiple-choice questions.
@@ -14,21 +14,26 @@ QUESTION COUNT: ${count}
 DOCUMENT CONTENT:
 ${context}
 
-Respond with ONLY a valid JSON array — no markdown fences, no explanation — where each element matches:
+Respond with ONLY a valid JSON object — no markdown fences, no explanation — matching this exact schema:
 {
-  "question": "string",
-  "options": [
-    { "label": "A", "text": "string" },
-    { "label": "B", "text": "string" },
-    { "label": "C", "text": "string" },
-    { "label": "D", "text": "string" }
-  ],
-  "correctAnswer": "A" | "B" | "C" | "D",
-  "explanation": "string — why the correct answer is right"
+  "questions": [
+    {
+      "question": "string",
+      "options": [
+        { "label": "A", "text": "string" },
+        { "label": "B", "text": "string" },
+        { "label": "C", "text": "string" },
+        { "label": "D", "text": "string" }
+      ],
+      "correctAnswer": "A",
+      "explanation": "string — why the correct answer is right"
+    }
+  ]
 }
 
 Rules:
-- Exactly ${count} questions
+- The "questions" array must contain exactly ${count} items
+- correctAnswer must be one of: A, B, C, D
 - All 4 options must be plausible
 - Base every question strictly on the provided content
 - Explanations must be 1-2 sentences
@@ -36,21 +41,26 @@ Rules:
 
 @Injectable()
 export class QuizService {
-  private readonly genai: GoogleGenerativeAI;
+  private readonly groqApiKey: string;
 
   constructor(
     private readonly config: ConfigService,
     private readonly documentsService: DocumentsService,
   ) {
-    this.genai = new GoogleGenerativeAI(config.get<string>('GEMINI_API_KEY') ?? '');
+    this.groqApiKey = config.get<string>('GROQ_API_KEY') ?? '';
   }
 
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<Quiz> {
+    if (!this.groqApiKey) {
+      throw new InternalServerErrorException(
+        'GROQ_API_KEY is not configured. Get a free key at https://console.groq.com',
+      );
+    }
+
     const topic = dto.topic ?? 'all main topics';
     const count = dto.questionCount ?? 5;
     const isConsolidated = !dto.sessionId;
 
-    // Fetch more chunks when consolidating across multiple documents
     const context = await this.documentsService.retrieveContext(
       topic,
       userId,
@@ -65,23 +75,30 @@ export class QuizService {
       );
     }
 
-    // ── 2. Generate with Gemini ──────────────────────────────────────────────
-    const model = this.genai.getGenerativeModel({
-      model: 'gemini-3.5-flash',
-      generationConfig: { temperature: 0.4, responseMimeType: 'application/json' },
-    });
-
-    const result = await model.generateContent(QUIZ_PROMPT(topic, count, context));
-    const raw = result.response.text();
-
-    // ── 3. Parse JSON ────────────────────────────────────────────────────────
+    let raw: string;
     try {
-      const jsonMatch = raw.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) throw new Error('No JSON array in response');
-      return JSON.parse(jsonMatch[0]) as Quiz;
+      raw = await callGroq(
+        this.groqApiKey,
+        [{ role: 'user', content: QUIZ_PROMPT(topic, count, context) }],
+        { temperature: 0.4, jsonMode: true },
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new InternalServerErrorException(`Groq error: ${msg}`);
+    }
+
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON object in response');
+      const parsed = JSON.parse(jsonMatch[0]) as { questions?: Quiz } | Quiz;
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && 'questions' in parsed && Array.isArray(parsed.questions)) {
+        return parsed.questions;
+      }
+      throw new Error('Missing questions array');
     } catch {
       throw new InternalServerErrorException(
-        'Gemini returned malformed JSON for quiz. Please try again.',
+        'Groq returned malformed JSON for quiz. Please try again.',
       );
     }
   }

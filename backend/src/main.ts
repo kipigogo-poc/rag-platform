@@ -44,7 +44,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('RAG Quiz Platform API')
-    .setDescription('Upload documents and generate AI-powered quizzes via Gemini + LangChain')
+    .setDescription('Upload documents and generate AI-powered notes and quizzes via Groq + LangChain')
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('documents')

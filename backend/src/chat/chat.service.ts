@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DocumentsService } from '../documents/documents.service';
+import { callGroq, GroqMessage } from '../common/groq';
 
 export interface ChatTurn {
   role: 'user' | 'assistant';
@@ -19,13 +19,13 @@ Rules:
 
 @Injectable()
 export class ChatService {
-  private readonly genai: GoogleGenerativeAI;
+  private readonly groqApiKey: string;
 
   constructor(
     private readonly config: ConfigService,
     private readonly documentsService: DocumentsService,
   ) {
-    this.genai = new GoogleGenerativeAI(config.get<string>('GEMINI_API_KEY') ?? '');
+    this.groqApiKey = config.get<string>('GROQ_API_KEY') ?? '';
   }
 
   async ask(
@@ -35,7 +35,12 @@ export class ChatService {
     sessionId: string | undefined,
     history: ChatTurn[] = [],
   ): Promise<string> {
-    // When sessionId is omitted, search across all docs in the subject
+    if (!this.groqApiKey) {
+      throw new InternalServerErrorException(
+        'GROQ_API_KEY is not configured. Get a free key at https://console.groq.com',
+      );
+    }
+
     const context = await this.documentsService.retrieveContext(
       message,
       userId,
@@ -48,43 +53,29 @@ export class ChatService {
       return "I couldn't find any content for this document. Make sure the document was uploaded and processed successfully.";
     }
 
-    // ── 2. Build prompt with history ─────────────────────────────────────────
-    const MAX_HISTORY = 10; // keep last 10 turns to stay within context window
+    const MAX_HISTORY = 10;
     const recentHistory = history.slice(-MAX_HISTORY);
 
-    const historyText = recentHistory.length
-      ? recentHistory
-          .map((t) => `${t.role === 'user' ? 'Student' : 'Tutor'}: ${t.content}`)
-          .join('\n')
-      : '';
+    const messages: GroqMessage[] = [
+      {
+        role: 'system',
+        content: `${SYSTEM_PROMPT}\n\nDOCUMENT CONTEXT:\n${context}`,
+      },
+      ...recentHistory.map((t) => ({
+        role: t.role,
+        content: t.content,
+      })),
+      { role: 'user', content: message },
+    ];
 
-    const prompt = [
-      SYSTEM_PROMPT,
-      '',
-      'DOCUMENT CONTEXT:',
-      context,
-      '',
-      historyText ? 'CONVERSATION SO FAR:' : '',
-      historyText,
-      '',
-      `Student: ${message}`,
-      'Tutor:',
-    ]
-      .filter((l) => l !== null && l !== undefined)
-      .join('\n');
-
-    // ── 3. Generate ──────────────────────────────────────────────────────────
     try {
-      const model = this.genai.getGenerativeModel({
-        model: 'gemini-3.5-flash',
-        generationConfig: { temperature: 0.5, maxOutputTokens: 512 },
-      });
-
-      const result = await model.generateContent(prompt);
-      return result.response.text().trim();
+      return (await callGroq(this.groqApiKey, messages, {
+        temperature: 0.5,
+        maxTokens: 512,
+      })).trim();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      throw new InternalServerErrorException(`Gemini error: ${msg}`);
+      throw new InternalServerErrorException(`Groq error: ${msg}`);
     }
   }
 }

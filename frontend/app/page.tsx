@@ -343,7 +343,7 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-bold">R</div>
           <span className="font-semibold tracking-tight">RAG Quiz</span>
           <span className="hidden sm:inline-block rounded-full border border-primary/30 bg-accent px-2 py-0.5 text-[10px] font-medium text-accent-foreground">
-            Gemini 3.5 Flash
+            Groq · Llama 3.3
           </span>
         </div>
         <div className="ml-auto flex items-center gap-3">
@@ -392,7 +392,7 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
 function AppFooter() {
   return (
     <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground mt-auto">
-      Built with Next.js · NestJS · LangChain.js · Gemini 3.5 Flash · Supabase pgvector
+      Built with Next.js · NestJS · Groq · Jina · Supabase pgvector
     </footer>
   );
 }
