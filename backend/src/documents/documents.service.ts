@@ -33,22 +33,42 @@ function makeEmbeddings(geminiApiKey: string, hfToken: string) {
   const CALL_DELAY_MS = 100;
 
   async function embedOneHF(text: string, retries = 4): Promise<number[]> {
-    const res = await fetch(HF_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${hfToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ inputs: text }),
-    });
+    // 60-second timeout per call — HF model cold-start can take ~30s
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
+
+    let res: Response;
+    try {
+      res = await fetch(HF_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${hfToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputs: text }),
+        signal: controller.signal,
+      });
+    } catch (err: unknown) {
+      clearTimeout(timeout);
+      const isAbort = err instanceof Error && err.name === 'AbortError';
+      if (isAbort && retries > 0) {
+        console.warn('[HF] Request timed out, retrying in 5s…');
+        await new Promise((r) => setTimeout(r, 5_000));
+        return embedOneHF(text, retries - 1);
+      }
+      throw new Error(`HuggingFace fetch failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      clearTimeout(timeout);
+    }
 
     // Model loading — HuggingFace returns 503 with estimated_time while warming up
     if (res.status === 503 && retries > 0) {
       let waitMs = 20_000;
       try {
         const body = await res.json() as { estimated_time?: number };
-        if (body.estimated_time) waitMs = body.estimated_time * 1000 + 2_000;
+        if (body.estimated_time) waitMs = Math.min(body.estimated_time * 1000 + 2_000, 60_000);
       } catch { /* ignore */ }
+      console.warn(`[HF] Model loading, waiting ${Math.round(waitMs / 1000)}s…`);
       await new Promise((r) => setTimeout(r, waitMs));
       return embedOneHF(text, retries - 1);
     }
@@ -63,11 +83,13 @@ function makeEmbeddings(geminiApiKey: string, hfToken: string) {
       throw new Error(`HuggingFace embedding error ${res.status}: ${err}`);
     }
 
-    const data = await res.json() as number[];
-    if (!Array.isArray(data) || data.length !== 768) {
-      throw new Error(`Unexpected embedding shape from HuggingFace: got ${JSON.stringify(data).slice(0, 100)}`);
+    const data = await res.json() as number[] | number[][];
+    // HF can return [[...]] (batch) or [...] (single)
+    const vector = Array.isArray(data[0]) ? (data as number[][])[0] : data as number[];
+    if (!Array.isArray(vector) || vector.length === 0) {
+      throw new Error(`Unexpected embedding shape from HuggingFace: ${JSON.stringify(data).slice(0, 120)}`);
     }
-    return data;
+    return vector;
   }
 
   async function embedOneGemini(text: string, retries = 3): Promise<number[]> {
