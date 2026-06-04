@@ -4,40 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { GenerateQuizDto } from './dto/generate-quiz.dto';
 import { Quiz } from './interfaces/quiz.interface';
 import { callGroq } from '../common/groq';
-
-const QUIZ_PROMPT = (topic: string, count: number, context: string) => `
-You are an expert quiz creator. Using ONLY the content provided below, generate exactly ${count} multiple-choice questions.
-
-TOPIC FOCUS: ${topic}
-QUESTION COUNT: ${count}
-
-DOCUMENT CONTENT:
-${context}
-
-Respond with ONLY a valid JSON object — no markdown fences, no explanation — matching this exact schema:
-{
-  "questions": [
-    {
-      "question": "string",
-      "options": [
-        { "label": "A", "text": "string" },
-        { "label": "B", "text": "string" },
-        { "label": "C", "text": "string" },
-        { "label": "D", "text": "string" }
-      ],
-      "correctAnswer": "A",
-      "explanation": "string — why the correct answer is right"
-    }
-  ]
-}
-
-Rules:
-- The "questions" array must contain exactly ${count} items
-- correctAnswer must be one of: A, B, C, D
-- All 4 options must be plausible
-- Base every question strictly on the provided content
-- Explanations must be 1-2 sentences
-`.trim();
+import { QUIZ_SYSTEM, buildQuizUser } from '../common/prompts';
 
 @Injectable()
 export class QuizService {
@@ -57,7 +24,7 @@ export class QuizService {
       );
     }
 
-    const topic = dto.topic ?? 'all main topics';
+    const topic = dto.topic?.trim() || 'all main topics';
     const count = dto.questionCount ?? 5;
     const isConsolidated = !dto.sessionId;
 
@@ -66,7 +33,7 @@ export class QuizService {
       userId,
       dto.subjectId,
       dto.sessionId,
-      isConsolidated ? 16 : 8,
+      isConsolidated ? 12 : 6,
     );
 
     if (!context.trim()) {
@@ -79,8 +46,11 @@ export class QuizService {
     try {
       raw = await callGroq(
         this.groqApiKey,
-        [{ role: 'user', content: QUIZ_PROMPT(topic, count, context) }],
-        { temperature: 0.4, jsonMode: true },
+        [
+          { role: 'system', content: QUIZ_SYSTEM },
+          { role: 'user', content: buildQuizUser(topic, count, context) },
+        ],
+        { temperature: 0.35, maxTokens: 3072, jsonMode: true },
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

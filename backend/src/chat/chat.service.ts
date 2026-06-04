@@ -2,20 +2,12 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentsService } from '../documents/documents.service';
 import { callGroq, GroqMessage } from '../common/groq';
+import { buildChatSystemWithSource, trimChatHistory } from '../common/prompts';
 
 export interface ChatTurn {
   role: 'user' | 'assistant';
   content: string;
 }
-
-const SYSTEM_PROMPT = `You are a helpful AI tutor. A student is asking you questions about a document they uploaded.
-
-Rules:
-- Answer ONLY based on the document context provided below.
-- Be conversational, clear, and concise.
-- If the answer is not in the context, say "I couldn't find that in the document — try rephrasing or ask about something else."
-- Do NOT make up information.
-- Keep answers to 2-4 sentences unless the question requires more detail.`;
 
 @Injectable()
 export class ChatService {
@@ -46,33 +38,26 @@ export class ChatService {
       userId,
       subjectId,
       sessionId,
-      sessionId ? 6 : 12,
+      sessionId ? 5 : 8,
     );
 
     if (!context.trim()) {
       return "I couldn't find any content for this document. Make sure the document was uploaded and processed successfully.";
     }
 
-    const MAX_HISTORY = 10;
-    const recentHistory = history.slice(-MAX_HISTORY);
-
     const messages: GroqMessage[] = [
-      {
-        role: 'system',
-        content: `${SYSTEM_PROMPT}\n\nDOCUMENT CONTEXT:\n${context}`,
-      },
-      ...recentHistory.map((t) => ({
-        role: t.role,
-        content: t.content,
-      })),
-      { role: 'user', content: message },
+      { role: 'system', content: buildChatSystemWithSource(context) },
+      ...trimChatHistory(history),
+      { role: 'user', content: message.trim() },
     ];
 
     try {
-      return (await callGroq(this.groqApiKey, messages, {
-        temperature: 0.5,
-        maxTokens: 512,
-      })).trim();
+      return (
+        await callGroq(this.groqApiKey, messages, {
+          temperature: 0.4,
+          maxTokens: 400,
+        })
+      ).trim();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       throw new InternalServerErrorException(`Groq error: ${msg}`);

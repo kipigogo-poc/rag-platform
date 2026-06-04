@@ -262,7 +262,7 @@ export class DocumentsService {
     if (!data || data.length === 0) return '';
 
     return (data as Array<{ content: string }>)
-      .map((row) => row.content)
-      .join('\n\n---\n\n');
+      .map((row, i) => `[${i + 1}] ${row.content.trim()}`)
+      .join('\n');
   }
 }

@@ -4,30 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { GenerateNotesDto } from './dto/generate-notes.dto';
 import { Notes } from './interfaces/notes.interface';
 import { callGroq } from '../common/groq';
-
-const NOTES_PROMPT = (topic: string, context: string) => `
-You are an expert academic note-taker. Using ONLY the content provided below, generate comprehensive structured study notes.
-
-TOPIC FOCUS: ${topic}
-
-DOCUMENT CONTENT:
-${context}
-
-Respond with ONLY a valid JSON object — no markdown fences, no explanation — matching this exact schema:
-{
-  "title": "string — concise descriptive title",
-  "summary": "string — 2-4 sentence overview",
-  "keyPoints": ["string", "string", ...],
-  "sections": [
-    { "heading": "string", "content": "string — detailed paragraph" }
-  ]
-}
-
-Rules:
-- keyPoints: 5–10 concise bullet strings
-- sections: 3–6 sections covering the main topics in the content
-- Base everything strictly on the provided content
-`.trim();
+import { NOTES_SYSTEM, buildNotesUser } from '../common/prompts';
 
 @Injectable()
 export class NotesService {
@@ -47,7 +24,7 @@ export class NotesService {
       );
     }
 
-    const topic = dto.topic ?? 'all main topics';
+    const topic = dto.topic?.trim() || 'all main topics';
     const isConsolidated = !dto.sessionId;
 
     const context = await this.documentsService.retrieveContext(
@@ -55,7 +32,7 @@ export class NotesService {
       userId,
       dto.subjectId,
       dto.sessionId,
-      isConsolidated ? 20 : 10,
+      isConsolidated ? 16 : 8,
     );
 
     if (!context.trim()) {
@@ -68,8 +45,11 @@ export class NotesService {
     try {
       raw = await callGroq(
         this.groqApiKey,
-        [{ role: 'user', content: NOTES_PROMPT(topic, context) }],
-        { temperature: 0.3, jsonMode: true },
+        [
+          { role: 'system', content: NOTES_SYSTEM },
+          { role: 'user', content: buildNotesUser(topic, context) },
+        ],
+        { temperature: 0.2, maxTokens: 2048, jsonMode: true },
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
