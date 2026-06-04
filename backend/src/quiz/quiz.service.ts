@@ -4,7 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { GenerateQuizDto } from './dto/generate-quiz.dto';
 import { Quiz } from './interfaces/quiz.interface';
 import { callGroq } from '../common/groq';
-import { QUIZ_SYSTEM, buildQuizUser } from '../common/prompts';
+import { QUIZ_SYSTEM, buildQuizUser, truncateSource } from '../common/prompts';
 
 @Injectable()
 export class QuizService {
@@ -48,9 +48,9 @@ export class QuizService {
         this.groqApiKey,
         [
           { role: 'system', content: QUIZ_SYSTEM },
-          { role: 'user', content: buildQuizUser(topic, count, context) },
+          { role: 'user', content: buildQuizUser(topic, count, truncateSource(context)) },
         ],
-        { temperature: 0.35, maxTokens: 3072, jsonMode: true },
+        { temperature: 0.35, maxTokens: 2048, jsonMode: true },
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

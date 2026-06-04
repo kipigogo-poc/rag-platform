@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentsService } from '../documents/documents.service';
 import { callGroq, GroqMessage } from '../common/groq';
-import { buildChatSystemWithSource, trimChatHistory } from '../common/prompts';
+import { buildChatSystemWithSource, trimChatHistory, truncateSource } from '../common/prompts';
 
 export interface ChatTurn {
   role: 'user' | 'assistant';
@@ -38,7 +38,7 @@ export class ChatService {
       userId,
       subjectId,
       sessionId,
-      sessionId ? 5 : 8,
+      sessionId ? 4 : 6,
     );
 
     if (!context.trim()) {
@@ -46,7 +46,7 @@ export class ChatService {
     }
 
     const messages: GroqMessage[] = [
-      { role: 'system', content: buildChatSystemWithSource(context) },
+      { role: 'system', content: buildChatSystemWithSource(truncateSource(context, 5_000)) },
       ...trimChatHistory(history),
       { role: 'user', content: message.trim() },
     ];

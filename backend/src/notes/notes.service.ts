@@ -4,7 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { GenerateNotesDto } from './dto/generate-notes.dto';
 import { Notes } from './interfaces/notes.interface';
 import { callGroq } from '../common/groq';
-import { NOTES_SYSTEM, buildNotesUser } from '../common/prompts';
+import { NOTES_SYSTEM, buildNotesUser, truncateSource } from '../common/prompts';
 
 @Injectable()
 export class NotesService {
@@ -32,7 +32,7 @@ export class NotesService {
       userId,
       dto.subjectId,
       dto.sessionId,
-      isConsolidated ? 16 : 8,
+      isConsolidated ? 8 : 5,
     );
 
     if (!context.trim()) {
@@ -47,9 +47,9 @@ export class NotesService {
         this.groqApiKey,
         [
           { role: 'system', content: NOTES_SYSTEM },
-          { role: 'user', content: buildNotesUser(topic, context) },
+          { role: 'user', content: buildNotesUser(topic, truncateSource(context)) },
         ],
-        { temperature: 0.2, maxTokens: 2048, jsonMode: true },
+        { temperature: 0.2, maxTokens: 1536, jsonMode: true },
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

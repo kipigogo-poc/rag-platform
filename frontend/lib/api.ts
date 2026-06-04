@@ -152,22 +152,24 @@ export async function generateNotes(payload: GenerateNotesPayload): Promise<Note
   });
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 /** Generate notes + quiz from ALL documents in a subject (no sessionId) */
 export async function consolidateSubject(
   subjectId: string,
   topic: string,
   questionCount: number,
 ): Promise<{ notes: Notes; quiz: Quiz }> {
-  const [notes, quiz] = await Promise.all([
-    apiClient<Notes>('/notes/generate', {
-      method: 'POST',
-      body: JSON.stringify({ subjectId, topic }),
-    }),
-    apiClient<Quiz>('/quiz/generate', {
-      method: 'POST',
-      body: JSON.stringify({ subjectId, topic, questionCount }),
-    }),
-  ]);
+  // Sequential calls — avoids Groq TPM/RPM burst (free tier ~30 req/min)
+  const notes = await apiClient<Notes>('/notes/generate', {
+    method: 'POST',
+    body: JSON.stringify({ subjectId, topic }),
+  });
+  await sleep(3_000);
+  const quiz = await apiClient<Quiz>('/quiz/generate', {
+    method: 'POST',
+    body: JSON.stringify({ subjectId, topic, questionCount }),
+  });
   return { notes, quiz };
 }
 

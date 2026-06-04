@@ -3,6 +3,13 @@
  * Pattern: short system (rules + schema) + user message (task + SOURCE only).
  */
 
+/** Cap SOURCE size to stay within Groq free-tier TPM (~12k/min on 70B). */
+export function truncateSource(source: string, maxChars = 7_000): string {
+  const trimmed = source.trim();
+  if (trimmed.length <= maxChars) return trimmed;
+  return `${trimmed.slice(0, maxChars)}\n[…source truncated]`;
+}
+
 // ─── Notes ───────────────────────────────────────────────────────────────────
 
 export const NOTES_SYSTEM = `You write study notes from SOURCE excerpts only.

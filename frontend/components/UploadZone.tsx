@@ -66,6 +66,9 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
       setState('notes');
       const notes = await generateNotes({ sessionId, subjectId, topic: focusTopic });
 
+      // Pause between Groq calls to avoid free-tier TPM/RPM limits
+      await new Promise((r) => setTimeout(r, 3_000));
+
       setStepIndex(2);
       setState('quiz');
       const quiz = await generateQuiz({ sessionId, subjectId, topic: focusTopic, questionCount });
