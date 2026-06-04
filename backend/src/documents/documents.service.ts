@@ -21,71 +21,93 @@ export interface SessionMeta {
   createdAt: string;
 }
 
-/** Calls the Gemini embedding REST API directly, with sequential rate-limited calls + smart retry */
-function makeEmbeddings(apiKey: string) {
-  // Sequential delay between every individual embed call.
-  // Keeps burst rate well below the 1,500 req/min free-tier cap while being
-  // gentle on the 1,000 req/day per-model quota.
-  const CALL_DELAY_MS = 120;
+/**
+ * HuggingFace Inference API embeddings using all-mpnet-base-v2.
+ * - 768 dimensions — matches existing Supabase vector(768) schema exactly
+ * - Completely free, globally available (no geographic restrictions)
+ * - Falls back to Gemini embedding API if HF_TOKEN is not set
+ */
+function makeEmbeddings(geminiApiKey: string, hfToken: string) {
+  const HF_MODEL = 'sentence-transformers/all-mpnet-base-v2';
+  const HF_URL = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
+  const CALL_DELAY_MS = 100;
 
-  async function embedWithRetry(text: string, retries: number): Promise<number[]> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${apiKey}`;
-    const res = await fetch(url, {
+  async function embedOneHF(text: string, retries = 4): Promise<number[]> {
+    const res = await fetch(HF_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: { parts: [{ text }] },
-        outputDimensionality: 768,
-      }),
+      headers: {
+        'Authorization': `Bearer ${hfToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ inputs: text }),
     });
 
-    if (res.status === 429) {
-      let body: { error?: { details?: Array<{ retryDelay?: string; quotaId?: string; violations?: Array<{ quotaId?: string }> }> } } = {};
-      try { body = await res.json(); } catch { /* ignore */ }
+    // Model loading — HuggingFace returns 503 with estimated_time while warming up
+    if (res.status === 503 && retries > 0) {
+      let waitMs = 20_000;
+      try {
+        const body = await res.json() as { estimated_time?: number };
+        if (body.estimated_time) waitMs = body.estimated_time * 1000 + 2_000;
+      } catch { /* ignore */ }
+      await new Promise((r) => setTimeout(r, waitMs));
+      return embedOneHF(text, retries - 1);
+    }
 
-      // Detect per-day quota exhaustion — retrying won't help until tomorrow
-      const violations = body.error?.details?.flatMap((d) => d.violations ?? []) ?? [];
-      const isDaily = violations.some((v) => v.quotaId?.includes('PerDay')) ||
-        body.error?.details?.some((d) => d.quotaId?.includes('PerDay'));
-      if (isDaily) {
-        throw new Error(
-          'Embedding API error 429: Daily free-tier quota exhausted (1,000 requests/day). ' +
-          'Quota resets at midnight Pacific Time. Reduce document size or wait until tomorrow.',
-        );
-      }
-
-      // Per-minute rate limit — back off and retry
-      if (retries > 0) {
-        let waitMs = 35_000;
-        try {
-          const delayStr = body.error?.details?.find((d) => d.retryDelay)?.retryDelay;
-          if (delayStr) waitMs = Math.max(parseFloat(delayStr) * 1000 + 500, 1_000);
-        } catch { /* ignore */ }
-        await new Promise((r) => setTimeout(r, waitMs));
-        return embedWithRetry(text, retries - 1);
-      }
+    if (res.status === 429 && retries > 0) {
+      await new Promise((r) => setTimeout(r, 10_000));
+      return embedOneHF(text, retries - 1);
     }
 
     if (!res.ok) {
       const err = await res.text();
-      throw new Error(`Embedding API error ${res.status}: ${err}`);
+      throw new Error(`HuggingFace embedding error ${res.status}: ${err}`);
     }
 
+    const data = await res.json() as number[];
+    if (!Array.isArray(data) || data.length !== 768) {
+      throw new Error(`Unexpected embedding shape from HuggingFace: got ${JSON.stringify(data).slice(0, 100)}`);
+    }
+    return data;
+  }
+
+  async function embedOneGemini(text: string, retries = 3): Promise<number[]> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${geminiApiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: { parts: [{ text }] }, outputDimensionality: 768 }),
+    });
+
+    if (res.status === 429 && retries > 0) {
+      let body: { error?: { details?: Array<{ retryDelay?: string; violations?: Array<{ quotaId?: string }> }> } } = {};
+      try { body = await res.json(); } catch { /* ignore */ }
+      const violations = body.error?.details?.flatMap((d) => d.violations ?? []) ?? [];
+      if (violations.some((v) => v.quotaId?.includes('PerDay'))) {
+        throw new Error('Gemini embedding quota exhausted for today. Set HF_TOKEN to use HuggingFace embeddings instead.');
+      }
+      await new Promise((r) => setTimeout(r, 35_000));
+      return embedOneGemini(text, retries - 1);
+    }
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Gemini embedding error ${res.status}: ${err}`);
+    }
     const data = (await res.json()) as { embedding: { values: number[] } };
     return data.embedding.values;
   }
 
-  async function embedQuery(text: string): Promise<number[]> {
-    return embedWithRetry(text, 3);
-  }
+  // Use HuggingFace when token is provided, fall back to Gemini
+  const embedOne = hfToken ? embedOneHF : embedOneGemini;
 
   return {
-    embedQuery,
-    /** Embeds sequentially with a small delay to stay well within rate limits */
+    async embedQuery(text: string): Promise<number[]> {
+      return embedOne(text);
+    },
     async embedDocuments(texts: string[]): Promise<number[][]> {
       const results: number[][] = [];
       for (const text of texts) {
-        results.push(await embedWithRetry(text, 3));
+        results.push(await embedOne(text));
         await new Promise((r) => setTimeout(r, CALL_DELAY_MS));
       }
       return results;
@@ -103,7 +125,10 @@ export class DocumentsService {
       config.get<string>('SUPABASE_URL') ?? '',
       config.get<string>('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
-    this.embeddings = makeEmbeddings(config.get<string>('GEMINI_API_KEY') ?? '');
+    this.embeddings = makeEmbeddings(
+      config.get<string>('GEMINI_API_KEY') ?? '',
+      config.get<string>('HF_TOKEN') ?? '',
+    );
   }
 
   async ingestDocument(
