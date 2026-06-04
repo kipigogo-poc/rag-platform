@@ -22,72 +22,58 @@ export interface SessionMeta {
 }
 
 /**
- * HuggingFace Inference API embeddings using all-mpnet-base-v2.
- * - 768 dimensions — matches existing Supabase vector(768) schema exactly
- * - Completely free, globally available (no geographic restrictions)
- * - Falls back to Gemini embedding API if HF_TOKEN is not set
+ * Embedding provider with priority chain:
+ *   1. Jina AI  (JINA_API_KEY set)  — free 1M tokens, 768-dim, globally available
+ *   2. Gemini   (fallback)          — blocked in some regions (e.g. Philippines)
+ *
+ * Jina AI free signup: https://jina.ai  →  API key starts with "jina_"
  */
-function makeEmbeddings(geminiApiKey: string, hfToken: string) {
-  const HF_MODEL = 'sentence-transformers/all-mpnet-base-v2';
-  const HF_URL = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
+function makeEmbeddings(geminiApiKey: string, jinaApiKey: string) {
   const CALL_DELAY_MS = 100;
 
-  async function embedOneHF(text: string, retries = 4): Promise<number[]> {
-    // 60-second timeout per call — HF model cold-start can take ~30s
+  async function embedOneJina(text: string, retries = 3): Promise<number[]> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60_000);
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
     let res: Response;
     try {
-      res = await fetch(HF_URL, {
+      res = await fetch('https://api.jina.ai/v1/embeddings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${hfToken}`,
+          'Authorization': `Bearer ${jinaApiKey}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ inputs: text }),
+        body: JSON.stringify({
+          model: 'jina-embeddings-v2-base-en',
+          input: [text],
+        }),
         signal: controller.signal,
       });
     } catch (err: unknown) {
-      clearTimeout(timeout);
-      const isAbort = err instanceof Error && err.name === 'AbortError';
-      if (isAbort && retries > 0) {
-        console.warn('[HF] Request timed out, retrying in 5s…');
-        await new Promise((r) => setTimeout(r, 5_000));
-        return embedOneHF(text, retries - 1);
+      clearTimeout(timeoutId);
+      if (retries > 0) {
+        await new Promise((r) => setTimeout(r, 3_000));
+        return embedOneJina(text, retries - 1);
       }
-      throw new Error(`HuggingFace fetch failed: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      clearTimeout(timeout);
+      throw new Error(`Jina AI fetch failed: ${err instanceof Error ? err.message : String(err)}`);
     }
-
-    // Model loading — HuggingFace returns 503 with estimated_time while warming up
-    if (res.status === 503 && retries > 0) {
-      let waitMs = 20_000;
-      try {
-        const body = await res.json() as { estimated_time?: number };
-        if (body.estimated_time) waitMs = Math.min(body.estimated_time * 1000 + 2_000, 60_000);
-      } catch { /* ignore */ }
-      console.warn(`[HF] Model loading, waiting ${Math.round(waitMs / 1000)}s…`);
-      await new Promise((r) => setTimeout(r, waitMs));
-      return embedOneHF(text, retries - 1);
-    }
+    clearTimeout(timeoutId);
 
     if (res.status === 429 && retries > 0) {
       await new Promise((r) => setTimeout(r, 10_000));
-      return embedOneHF(text, retries - 1);
+      return embedOneJina(text, retries - 1);
     }
 
     if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`HuggingFace embedding error ${res.status}: ${err}`);
+      const errText = await res.text();
+      throw new Error(`Jina AI embedding error ${res.status}: ${errText}`);
     }
 
-    const data = await res.json() as number[] | number[][];
-    // HF can return [[...]] (batch) or [...] (single)
-    const vector = Array.isArray(data[0]) ? (data as number[][])[0] : data as number[];
+    const data = await res.json() as { data: Array<{ embedding: number[] }> };
+    const vector = data?.data?.[0]?.embedding;
     if (!Array.isArray(vector) || vector.length === 0) {
-      throw new Error(`Unexpected embedding shape from HuggingFace: ${JSON.stringify(data).slice(0, 120)}`);
+      throw new Error(`Unexpected Jina AI response: ${JSON.stringify(data).slice(0, 120)}`);
     }
     return vector;
   }
@@ -105,7 +91,7 @@ function makeEmbeddings(geminiApiKey: string, hfToken: string) {
       try { body = await res.json(); } catch { /* ignore */ }
       const violations = body.error?.details?.flatMap((d) => d.violations ?? []) ?? [];
       if (violations.some((v) => v.quotaId?.includes('PerDay'))) {
-        throw new Error('Gemini embedding quota exhausted for today. Set HF_TOKEN to use HuggingFace embeddings instead.');
+        throw new Error('Gemini embedding quota exhausted for today. Set JINA_API_KEY to use Jina AI embeddings instead.');
       }
       await new Promise((r) => setTimeout(r, 35_000));
       return embedOneGemini(text, retries - 1);
@@ -119,8 +105,7 @@ function makeEmbeddings(geminiApiKey: string, hfToken: string) {
     return data.embedding.values;
   }
 
-  // Use HuggingFace when token is provided, fall back to Gemini
-  const embedOne = hfToken ? embedOneHF : embedOneGemini;
+  const embedOne = jinaApiKey ? embedOneJina : embedOneGemini;
 
   return {
     async embedQuery(text: string): Promise<number[]> {
@@ -149,7 +134,7 @@ export class DocumentsService {
     );
     this.embeddings = makeEmbeddings(
       config.get<string>('GEMINI_API_KEY') ?? '',
-      config.get<string>('HF_TOKEN') ?? '',
+      config.get<string>('JINA_API_KEY') ?? '',
     );
   }
 
