@@ -65,12 +65,10 @@ export class DocumentsController {
     @CurrentUser() user: AuthUser,
   ) {
     if (!file) {
-      throw new BadRequestException(
-        'No file uploaded. Send a PDF or TXT as multipart/form-data with field name "file".',
-      );
+      throw new BadRequestException('Attach a PDF or TXT file.');
     }
     if (!subjectId) {
-      throw new BadRequestException('Query parameter "subjectId" is required.');
+      throw new BadRequestException('Pick a subject first.');
     }
     return this.documentsService.ingestDocument(file, user.id, subjectId);
   }

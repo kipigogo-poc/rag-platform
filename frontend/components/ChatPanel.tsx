@@ -46,7 +46,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
     } catch {
       setHistory((h) => [
         ...h,
-        { role: 'assistant', content: 'Something went wrong. Please try again.' },
+        { role: 'assistant', content: "Couldn't get an answer. Try again." },
       ]);
     } finally {
       setLoading(false);
@@ -62,46 +62,44 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-[580px] rounded-xl border border-border overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-accent/30 shrink-0">
-        <Bot className="h-4 w-4 text-primary" />
-        <span className="text-sm font-medium">Chat about this document</span>
-        <span className="text-xs text-muted-foreground ml-1 truncate">— {fileName}</span>
+    <div className="flex flex-col h-[580px] rounded-md border border-gray-200 overflow-hidden shadow-sm">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-200 bg-danube/8 shrink-0">
+        <Bot className="h-4 w-4 text-torea" />
+        <span className="text-sm font-medium text-cocoa">Ask your doc</span>
+        <span className="text-xs text-cocoa/60 ml-1 truncate">— {fileName}</span>
         {history.length > 0 && (
           <button
             onClick={() => setHistory([])}
-            className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-auto flex items-center gap-1 text-xs text-danube hover:text-torea transition-colors"
           >
             <RotateCcw className="h-3 w-3" />
-            Clear
+            Start over
           </button>
         )}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-4">
         {history.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center h-full gap-3 text-center animate-fade-in">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
-              <Bot className="h-6 w-6 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-center animate-fade-in">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-danube/15">
+              <Bot className="h-6 w-6 text-danube" />
             </div>
             <div>
-              <p className="text-sm font-medium">Ask anything about this document</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                I&apos;ll search the relevant parts and answer in plain language.
+              <p className="text-sm font-medium text-torea">Ask anything in this doc</p>
+              <p className="text-xs text-cocoa/60 mt-1 leading-relaxed">
+                Answers come straight from your upload.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mt-2">
               {[
-                'What is the main idea?',
-                'Summarize in 3 bullets',
-                'What are the key concepts?',
+                "What's the main idea?",
+                'Hit me with 3 bullets',
+                'What should I memorize?',
               ].map((s) => (
                 <button
                   key={s}
                   onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                  className="text-xs rounded-full border border-border px-3 py-1.5 hover:bg-accent hover:border-primary/40 transition-colors"
+                  className="text-xs rounded-md border border-gray-200 px-3 py-1.5 text-cocoa hover:bg-danube/10 hover:border-danube transition-colors"
                 >
                   {s}
                 </button>
@@ -118,27 +116,25 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
               turn.role === 'user' ? 'flex-row-reverse' : 'flex-row',
             )}
           >
-            {/* Avatar */}
             <div
               className={cn(
                 'shrink-0 flex h-7 w-7 items-center justify-center rounded-full mt-0.5',
                 turn.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-accent border border-border',
+                  ? 'bg-torea text-white'
+                  : 'bg-danube/10 border border-gray-200',
               )}
             >
               {turn.role === 'user'
                 ? <User className="h-3.5 w-3.5" />
-                : <Bot className="h-3.5 w-3.5 text-muted-foreground" />}
+                : <Bot className="h-3.5 w-3.5 text-danube" />}
             </div>
 
-            {/* Bubble */}
             <div
               className={cn(
-                'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                'max-w-[78%] rounded-md px-4 py-2.5 text-sm leading-relaxed',
                 turn.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                  : 'bg-accent border border-border rounded-tl-sm',
+                  ? 'bg-torea text-white rounded-tr-sm'
+                  : 'bg-white border border-gray-200 text-cocoa rounded-tl-sm',
               )}
             >
               {turn.content}
@@ -148,11 +144,11 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
 
         {loading && (
           <div className="flex gap-2.5 animate-fade-in">
-            <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-accent border border-border">
-              <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-danube/10 border border-gray-200">
+              <Bot className="h-3.5 w-3.5 text-danube" />
             </div>
-            <div className="bg-accent border border-border rounded-2xl rounded-tl-sm px-4 py-3">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <div className="bg-white border border-gray-200 rounded-md rounded-tl-sm px-4 py-3">
+              <Loader2 className="h-4 w-4 animate-spin text-danube" />
             </div>
           </div>
         )}
@@ -160,17 +156,16 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="shrink-0 border-t border-border px-3 py-3">
+      <div className="shrink-0 border-t border-gray-200 px-4 py-4">
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Ask a question about this document…"
+            placeholder="What tripped you up in this chapter?"
             disabled={loading}
-            className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            className="flex-1 h-10 rounded-md border border-gray-200 bg-background px-3 text-sm text-cocoa placeholder:text-cocoa/40 focus:outline-none focus:ring-2 focus:ring-torea disabled:opacity-50"
           />
           <Button
             size="sm"

@@ -15,6 +15,10 @@ const config: Config = {
     },
     extend: {
       colors: {
+        cocoa: '#31241f',
+        torea: '#0a2a92',
+        danube: '#5992c6',
+        shilo: '#e9b8c9',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

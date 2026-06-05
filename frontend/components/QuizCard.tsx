@@ -25,8 +25,8 @@ interface QuizCardProps {
 const OPTION_COLORS = {
   correct: 'border-emerald-500 bg-emerald-50 text-emerald-900',
   wrong: 'border-red-400 bg-red-50 text-red-900',
-  selected: 'border-primary bg-accent text-accent-foreground',
-  default: 'border-border hover:border-primary/60 hover:bg-accent/40',
+  selected: 'border-torea bg-danube/10 text-cocoa',
+  default: 'border-gray-200 hover:border-danube hover:bg-danube/5 text-cocoa',
 } as const;
 
 export function QuizCard({
@@ -66,14 +66,13 @@ export function QuizCard({
   }
 
   return (
-    <div className="animate-fade-in space-y-4">
-      {/* Meta bar */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between text-xs text-cocoa/60">
         <span className="flex items-center gap-1.5">
-          <BookOpen className="h-3.5 w-3.5" />
+          <BookOpen className="h-3.5 w-3.5 text-danube" />
           {fileName}
         </span>
-        <Badge variant="outline">
+        <Badge variant="outline" className="border-gray-200">
           {questionIndex + 1} / {totalQuestions}
         </Badge>
       </div>
@@ -81,9 +80,9 @@ export function QuizCard({
       <Progress value={progress} />
 
       {/* Question card */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg leading-snug">{question.question}</CardTitle>
+      <Card className="border-gray-200 shadow-sm">
+        <CardHeader className="pb-5">
+          <CardTitle className="text-lg leading-snug text-torea">{question.question}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {question.options.map((option) => (
@@ -92,7 +91,7 @@ export function QuizCard({
               disabled={isAnswered}
               onClick={() => onAnswer(option.label)}
               className={cn(
-                'w-full flex items-start gap-3 rounded-lg border-2 px-4 py-3 text-left text-sm transition-all duration-150',
+                'w-full flex items-start gap-3 rounded-md border px-4 py-3.5 text-left text-sm transition-all duration-150',
                 getOptionStyle(option.label),
                 !isAnswered && 'cursor-pointer',
                 isAnswered && 'cursor-default',
@@ -117,7 +116,7 @@ export function QuizCard({
       {isAnswered && (
         <div
           className={cn(
-            'rounded-lg border-2 px-4 py-3 text-sm animate-fade-in',
+            'rounded-md border px-4 py-3 text-sm animate-fade-in',
             isCorrect
               ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
               : 'border-red-300 bg-red-50 text-red-900',
@@ -126,11 +125,11 @@ export function QuizCard({
           <div className="flex items-center gap-2 font-semibold mb-1">
             {isCorrect ? (
               <>
-                <CheckCircle2 className="h-4 w-4" /> Correct!
+                <CheckCircle2 className="h-4 w-4" /> Nailed it
               </>
             ) : (
               <>
-                <XCircle className="h-4 w-4" /> Incorrect — the answer is{' '}
+                <XCircle className="h-4 w-4" /> Answer:{' '}
                 <strong>{question.correctAnswer}</strong>
               </>
             )}
@@ -140,9 +139,9 @@ export function QuizCard({
           ) : (
             <button
               onClick={() => setShowExplanation(true)}
-              className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100"
+              className="text-xs text-danube underline underline-offset-2 hover:text-torea transition-colors"
             >
-              Show explanation
+              Why?
             </button>
           )}
         </div>
@@ -164,7 +163,7 @@ export function QuizCard({
           disabled={!isAnswered}
           onClick={handleNext}
         >
-          {isLast ? 'See Results' : 'Next'}
+          {isLast ? 'View score' : 'Next'}
           {!isLast && <ChevronRight className="h-4 w-4" />}
         </Button>
       </div>

@@ -16,7 +16,6 @@ export class ContentSessionsService {
   }
 
   async save(userId: string, dto: SaveContentSessionDto): Promise<ContentSession> {
-    // Upsert so re-uploading the same sessionId doesn't create duplicates
     const { data, error } = await this.supabase
       .from('content_sessions')
       .upsert(

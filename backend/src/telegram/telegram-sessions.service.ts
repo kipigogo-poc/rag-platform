@@ -21,11 +21,9 @@ export class TelegramSessionsService {
     );
   }
 
-  // ── Link tokens ─────────────────────────────────────────────────────────────
-
   async createLinkToken(userId: string): Promise<string> {
     const token = randomBytes(16).toString('hex');
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     const { error } = await this.supabase
       .from('link_tokens')
@@ -51,8 +49,6 @@ export class TelegramSessionsService {
     await this.supabase.from('link_tokens').delete().eq('token', token);
     return data.user_id as string;
   }
-
-  // ── Telegram sessions ────────────────────────────────────────────────────────
 
   async getSession(telegramId: number): Promise<TelegramSession | null> {
     const { data, error } = await this.supabase
@@ -91,8 +87,6 @@ export class TelegramSessionsService {
   async clearSession(telegramId: number): Promise<void> {
     await this.supabase.from('telegram_sessions').delete().eq('telegram_id', telegramId);
   }
-
-  // ── Subject + session helpers ────────────────────────────────────────────────
 
   async listSubjects(userId: string): Promise<Array<{ id: string; name: string; color: string }>> {
     const { data } = await this.supabase

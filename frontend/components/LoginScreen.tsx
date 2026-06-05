@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ASSETS } from '@/lib/assets';
 
 function GoogleIcon() {
   return (
@@ -46,26 +47,30 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6 animate-fade-in">
-        {/* Brand hero */}
-        <div className="text-center space-y-2">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white text-2xl font-bold shadow-lg">
+    <section className="parallax-hero min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-16">
+      <div
+        className="parallax-layer absolute inset-0 -z-20"
+        style={{ backgroundImage: `url(${ASSETS.images.heroBackground})` }}
+        aria-hidden
+      />
+      <div className="parallax-overlay -z-10" aria-hidden />
+      <div className="relative w-full max-w-sm space-y-8 animate-fade-in">
+        <div className="text-center space-y-3">
+          <div className="flex justify-center mb-2">
+            <div className="flex h-16 w-16 items-center justify-center rounded-md bg-torea text-white text-2xl font-bold tracking-tight shadow-sm">
               R
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome to RAG Quiz</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to create subject folders, upload documents, and generate AI-powered quizzes.
+          <h1 className="text-3xl font-bold tracking-tight text-torea">RAG Quiz</h1>
+          <p className="text-sm text-cocoa/70 leading-relaxed">
+            Upload docs. Get notes, quizzes, and chat — by subject.
           </p>
         </div>
 
-        {/* Sign-in card */}
-        <Card>
+        <Card className="border-gray-200 shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-base">Sign in to continue</CardTitle>
-            <CardDescription>No password needed — use your existing account.</CardDescription>
+            <CardTitle className="text-base text-torea">Log in</CardTitle>
+            <CardDescription>Google or GitHub. No password.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
@@ -79,7 +84,7 @@ export function LoginScreen() {
               ) : (
                 <GoogleIcon />
               )}
-              Continue with Google
+              Log in with Google
             </Button>
 
             <Button
@@ -93,16 +98,15 @@ export function LoginScreen() {
               ) : (
                 <GitHubIcon />
               )}
-              Continue with GitHub
+              Log in with GitHub
             </Button>
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground">
-          By signing in you agree to store your subjects and quiz sessions in our database.
-          No document content is stored permanently.
+        <p className="text-center text-xs text-cocoa/60 leading-relaxed">
+          We store subjects and sessions — not your raw files forever.
         </p>
       </div>
-    </div>
+    </section>
   );
 }

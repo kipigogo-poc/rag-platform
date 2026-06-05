@@ -85,8 +85,8 @@ export class SubjectsService {
       .eq('id', id)
       .single();
 
-    if (error || !data) throw new NotFoundException(`Subject ${id} not found`);
-    if (data.user_id !== userId) throw new ForbiddenException('Access denied');
+    if (error || !data) throw new NotFoundException('Subject not found');
+    if (data.user_id !== userId) throw new ForbiddenException("You can't access this subject");
   }
 
   private toSubject(row: Record<string, unknown>): Subject {

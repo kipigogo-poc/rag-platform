@@ -18,11 +18,11 @@ interface QuizResultsProps {
 
 function getGrade(score: number, total: number): { label: string; color: string } {
   const pct = (score / total) * 100;
-  if (pct === 100) return { label: 'Perfect!', color: 'text-emerald-600' };
-  if (pct >= 80) return { label: 'Excellent', color: 'text-emerald-600' };
-  if (pct >= 60) return { label: 'Good', color: 'text-amber-600' };
-  if (pct >= 40) return { label: 'Fair', color: 'text-orange-600' };
-  return { label: 'Keep studying', color: 'text-red-600' };
+  if (pct === 100) return { label: 'Flawless', color: 'text-torea' };
+  if (pct >= 80) return { label: 'Strong', color: 'text-torea' };
+  if (pct >= 60) return { label: 'Solid', color: 'text-danube' };
+  if (pct >= 40) return { label: 'Getting there', color: 'text-cocoa/70' };
+  return { label: 'Keep going', color: 'text-red-600' };
 }
 
 export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: QuizResultsProps) {
@@ -32,53 +32,52 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
   const grade = getGrade(score, total);
 
   return (
-    <div className="animate-fade-in space-y-6">
-      {/* Score hero */}
-      <Card className="text-center overflow-hidden">
-        <div className="h-1.5 bg-gradient-to-r from-violet-500 to-indigo-500" />
-        <CardContent className="pt-8 pb-8 space-y-4">
+    <div className="animate-fade-in space-y-8">
+      <Card className="text-center overflow-hidden border-gray-200 shadow-sm">
+        <div className="h-1.5 bg-gradient-to-r from-torea to-danube" />
+        <CardContent className="py-10 space-y-5">
           <div className="flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-indigo-100">
-              <Trophy className="h-9 w-9 text-primary" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-md bg-danube/15">
+              <Trophy className="h-9 w-9 text-torea" />
             </div>
           </div>
           <div>
-            <div className={cn('text-5xl font-bold tabular-nums', grade.color)}>
+            <div className={cn('text-5xl font-bold tabular-nums tracking-tight', grade.color)}>
               {percentage}%
             </div>
-            <div className={cn('text-lg font-semibold mt-1', grade.color)}>{grade.label}</div>
-            <div className="text-sm text-muted-foreground mt-0.5">
+            <div className={cn('text-lg font-semibold mt-1 tracking-tight', grade.color)}>{grade.label}</div>
+            <div className="text-sm text-cocoa/60 mt-1 leading-relaxed">
               {score} / {total} correct
             </div>
           </div>
           <Progress value={percentage} className="h-3 max-w-xs mx-auto" />
-          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <BookOpen className="h-3.5 w-3.5" />
+          <div className="flex items-center justify-center gap-1.5 text-xs text-cocoa/60">
+            <BookOpen className="h-3.5 w-3.5 text-danube" />
             {fileName}
           </div>
         </CardContent>
       </Card>
 
       {/* Answer review */}
-      <div className="space-y-3">
-        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-          Answer Review
+      <div className="space-y-4">
+        <h2 className="font-semibold text-sm text-cocoa/60 uppercase tracking-wider">
+          Answer breakdown
         </h2>
         {quiz.map((question, i) => {
           const userAnswer = answers[i];
           const isCorrect = userAnswer === question.correctAnswer;
           return (
-            <Card key={i} className={cn('animate-slide-in', { 'opacity-95': !isCorrect })}>
-              <CardHeader className="pb-2">
+            <Card key={i} className={cn('animate-slide-in border-gray-200 shadow-sm', { 'opacity-95': !isCorrect })}>
+              <CardHeader className="pb-3">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">
                     {isCorrect ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                      <CheckCircle2 className="h-5 w-5 text-torea" />
                     ) : (
                       <XCircle className="h-5 w-5 text-red-500" />
                     )}
                   </div>
-                  <CardTitle className="text-sm font-medium leading-snug">
+                  <CardTitle className="text-sm font-medium leading-snug text-cocoa">
                     {question.question}
                   </CardTitle>
                 </div>
@@ -87,19 +86,19 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
                 <div className="flex flex-wrap gap-2 text-xs">
                   {userAnswer && (
                     <Badge variant={isCorrect ? 'success' : 'destructive'}>
-                      Your answer: {userAnswer}
+                      You: {userAnswer}
                     </Badge>
                   )}
                   {!isCorrect && (
                     <Badge variant="success">
-                      Correct: {question.correctAnswer}
+                      Right answer: {question.correctAnswer}
                     </Badge>
                   )}
                   {!userAnswer && (
                     <Badge variant="secondary">Skipped</Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-xs text-cocoa/65 leading-relaxed">
                   {question.explanation}
                 </p>
               </CardContent>
@@ -112,11 +111,11 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
       <div className="flex gap-3 pt-2">
         <Button variant="outline" className="flex-1 gap-2" onClick={onRetake}>
           <RefreshCcw className="h-4 w-4" />
-          Retake Quiz
+          Run it again
         </Button>
         <Button className="flex-1 gap-2" onClick={onRestart}>
           <UploadCloud className="h-4 w-4" />
-          New Document
+          Upload new doc
         </Button>
       </div>
     </div>

@@ -7,9 +7,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'RAG Quiz Platform',
-  description:
-    'Upload any PDF and generate an AI-powered multiple-choice quiz in seconds — powered by Google Gemini and LangChain.',
+  title: 'RAG Quiz',
+  description: 'Upload a doc. Get notes, quizzes, and chat — organized by subject.',
   keywords: ['RAG', 'AI', 'quiz', 'Gemini', 'LangChain', 'NestJS', 'Next.js'],
 };
 
@@ -20,7 +19,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased min-h-screen`}>
+      <body className={`${inter.variable} font-sans antialiased min-h-screen text-cocoa`}>
         <AuthProvider session={session}>
           <div className="relative flex min-h-screen flex-col">
             {children}

@@ -15,14 +15,14 @@ export interface Subject {
 }
 
 const PRESET_COLORS = [
-  '#6d28d9', // violet
-  '#2563eb', // blue
-  '#059669', // emerald
-  '#d97706', // amber
-  '#dc2626', // red
-  '#7c3aed', // purple
-  '#0891b2', // cyan
-  '#be185d', // pink
+  '#0a2a92',
+  '#5992c6',
+  '#31241f',
+  '#1e40af',
+  '#0369a1',
+  '#0f766e',
+  '#b45309',
+  '#be185d',
 ];
 
 interface SubjectSidebarProps {
@@ -112,28 +112,27 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
   }
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col gap-1 pr-4 border-r border-border min-h-[400px]">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <aside className="flex w-56 shrink-0 flex-col gap-2 pr-6 border-r border-gray-200 min-h-[400px]">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold uppercase tracking-wider text-cocoa/60">
           Subjects
         </span>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-accent transition-colors"
-          title="New subject"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 hover:border-danube hover:bg-danube/10 transition-colors"
+          title="Add subject"
         >
-          <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+          <Plus className="h-3.5 w-3.5 text-danube" />
         </button>
       </div>
 
-      {/* Create form */}
       {showForm && (
-        <form onSubmit={handleCreate} className="mb-2 space-y-2 animate-fade-in">
+        <form onSubmit={handleCreate} className="mb-3 space-y-3 animate-fade-in p-4 rounded-md border border-gray-200 bg-white shadow-sm">
           <Input
             ref={inputRef}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Subject name…"
+            placeholder="AWS Practitioner"
             maxLength={80}
             disabled={creating}
           />
@@ -145,7 +144,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
                 onClick={() => setNewColor(c)}
                 className={cn(
                   'h-5 w-5 rounded-full border-2 transition-transform',
-                  newColor === c ? 'border-foreground scale-110' : 'border-transparent',
+                  newColor === c ? 'border-torea scale-110' : 'border-transparent',
                 )}
                 style={{ backgroundColor: c }}
                 title={c}
@@ -163,21 +162,20 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
               variant="ghost"
               onClick={() => { setShowForm(false); setNewName(''); }}
             >
-              Cancel
+              Never mind
             </Button>
           </div>
         </form>
       )}
 
-      {/* Subject list */}
       {loading ? (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+        <div className="flex items-center gap-2 text-xs text-cocoa/60 py-3">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading…
         </div>
       ) : subjects.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-8 text-center">
-          <BookOpen className="h-8 w-8 text-muted-foreground/40" />
-          <p className="text-xs text-muted-foreground">No subjects yet.<br />Create one above.</p>
+        <div className="flex flex-col items-center gap-3 py-10 text-center px-4">
+          <BookOpen className="h-8 w-8 text-danube/40" />
+          <p className="text-xs text-cocoa/60 leading-relaxed">No subjects yet.<br />Hit + to add one.</p>
         </div>
       ) : (
         <ul className="space-y-0.5">
@@ -200,10 +198,10 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
               ) : (
                 <div
                   className={cn(
-                    'group flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer transition-colors text-sm',
+                    'group flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors text-sm',
                     activeSubjectId === subject.id
-                      ? 'bg-accent font-medium'
-                      : 'hover:bg-accent/60 text-muted-foreground hover:text-foreground',
+                      ? 'bg-danube/15 border border-danube/30 font-medium text-torea'
+                      : 'hover:bg-danube/8 text-cocoa/70 hover:text-cocoa border border-transparent',
                   )}
                   onClick={() => onSelect(subject)}
                 >
@@ -230,7 +228,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
                         handleDelete(subject.id);
                       }}
                       className="p-0.5 rounded hover:bg-destructive/20 hover:text-destructive"
-                      title="Delete"
+                      title="Remove"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
