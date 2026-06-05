@@ -4,6 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { GenerateQuizDto } from './dto/generate-quiz.dto';
 import { Quiz } from './interfaces/quiz.interface';
 import { callGroq } from '../common/groq';
+import { parseQuizResponse } from '../common/llm-response';
 import { QUIZ_SYSTEM, buildQuizUser, truncateSource } from '../common/prompts';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class QuizService {
   async generateQuiz(dto: GenerateQuizDto, userId: string): Promise<Quiz> {
     if (!this.groqApiKey) {
       throw new InternalServerErrorException(
-        'GROQ_API_KEY is not configured. Get a free key at https://console.groq.com',
+        'GROQ_API_KEY missing. Grab a free key at https://console.groq.com',
       );
     }
 
@@ -38,38 +39,19 @@ export class QuizService {
 
     if (!context.trim()) {
       throw new InternalServerErrorException(
-        'No content found for this session. Make sure the document was uploaded successfully.',
+        'Nothing to work with yet. Upload a doc first.',
       );
     }
 
-    let raw: string;
-    try {
-      raw = await callGroq(
-        this.groqApiKey,
-        [
-          { role: 'system', content: QUIZ_SYSTEM },
-          { role: 'user', content: buildQuizUser(topic, count, truncateSource(context)) },
-        ],
-        { temperature: 0.35, maxTokens: 2048, jsonMode: true },
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new InternalServerErrorException(`Groq error: ${msg}`);
-    }
+    const raw = await callGroq(
+      this.groqApiKey,
+      [
+        { role: 'system', content: QUIZ_SYSTEM },
+        { role: 'user', content: buildQuizUser(topic, count, truncateSource(context)) },
+      ],
+      { temperature: 0.35, maxTokens: 2048, jsonMode: true },
+    );
 
-    try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON object in response');
-      const parsed = JSON.parse(jsonMatch[0]) as { questions?: Quiz } | Quiz;
-      if (Array.isArray(parsed)) return parsed;
-      if (parsed && 'questions' in parsed && Array.isArray(parsed.questions)) {
-        return parsed.questions;
-      }
-      throw new Error('Missing questions array');
-    } catch {
-      throw new InternalServerErrorException(
-        'Groq returned malformed JSON for quiz. Please try again.',
-      );
-    }
+    return parseQuizResponse(raw);
   }
 }

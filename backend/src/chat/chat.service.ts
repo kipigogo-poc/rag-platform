@@ -29,7 +29,7 @@ export class ChatService {
   ): Promise<string> {
     if (!this.groqApiKey) {
       throw new InternalServerErrorException(
-        'GROQ_API_KEY is not configured. Get a free key at https://console.groq.com',
+        'GROQ_API_KEY missing. Grab a free key at https://console.groq.com',
       );
     }
 
@@ -42,7 +42,7 @@ export class ChatService {
     );
 
     if (!context.trim()) {
-      return "I couldn't find any content for this document. Make sure the document was uploaded and processed successfully.";
+      return "Can't find content for this doc. Upload and process it first.";
     }
 
     const messages: GroqMessage[] = [
@@ -51,16 +51,11 @@ export class ChatService {
       { role: 'user', content: message.trim() },
     ];
 
-    try {
-      return (
-        await callGroq(this.groqApiKey, messages, {
-          temperature: 0.4,
-          maxTokens: 400,
-        })
-      ).trim();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new InternalServerErrorException(`Groq error: ${msg}`);
-    }
+    return (
+      await callGroq(this.groqApiKey, messages, {
+        temperature: 0.4,
+        maxTokens: 400,
+      })
+    ).trim();
   }
 }

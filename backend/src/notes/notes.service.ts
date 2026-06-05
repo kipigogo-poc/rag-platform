@@ -4,6 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { GenerateNotesDto } from './dto/generate-notes.dto';
 import { Notes } from './interfaces/notes.interface';
 import { callGroq } from '../common/groq';
+import { parseNotesResponse } from '../common/llm-response';
 import { NOTES_SYSTEM, buildNotesUser, truncateSource } from '../common/prompts';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class NotesService {
   async generateNotes(dto: GenerateNotesDto, userId: string): Promise<Notes> {
     if (!this.groqApiKey) {
       throw new InternalServerErrorException(
-        'GROQ_API_KEY is not configured. Get a free key at https://console.groq.com',
+        'GROQ_API_KEY missing. Grab a free key at https://console.groq.com',
       );
     }
 
@@ -37,33 +38,19 @@ export class NotesService {
 
     if (!context.trim()) {
       throw new InternalServerErrorException(
-        'No content found for this session. Make sure the document was uploaded successfully.',
+        'Nothing to work with yet. Upload a doc first.',
       );
     }
 
-    let raw: string;
-    try {
-      raw = await callGroq(
-        this.groqApiKey,
-        [
-          { role: 'system', content: NOTES_SYSTEM },
-          { role: 'user', content: buildNotesUser(topic, truncateSource(context)) },
-        ],
-        { temperature: 0.2, maxTokens: 1536, jsonMode: true },
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new InternalServerErrorException(`Groq error: ${msg}`);
-    }
+    const raw = await callGroq(
+      this.groqApiKey,
+      [
+        { role: 'system', content: NOTES_SYSTEM },
+        { role: 'user', content: buildNotesUser(topic, truncateSource(context)) },
+      ],
+      { temperature: 0.2, maxTokens: 1536, jsonMode: true },
+    );
 
-    try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON object in response');
-      return JSON.parse(jsonMatch[0]) as Notes;
-    } catch {
-      throw new InternalServerErrorException(
-        'Groq returned malformed JSON for notes. Please try again.',
-      );
-    }
+    return parseNotesResponse(raw);
   }
 }

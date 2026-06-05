@@ -1,16 +1,8 @@
-/**
- * RAG prompt templates — optimized for accuracy, specificity, natural tone, and token use.
- * Pattern: short system (rules + schema) + user message (task + SOURCE only).
- */
-
-/** Cap SOURCE size to stay within Groq free-tier TPM (~12k/min on 70B). */
 export function truncateSource(source: string, maxChars = 7_000): string {
   const trimmed = source.trim();
   if (trimmed.length <= maxChars) return trimmed;
   return `${trimmed.slice(0, maxChars)}\n[…source truncated]`;
 }
-
-// ─── Notes ───────────────────────────────────────────────────────────────────
 
 export const NOTES_SYSTEM = `You write study notes from SOURCE excerpts only.
 
@@ -33,8 +25,6 @@ export function buildNotesUser(topic: string, source: string): string {
   return `${focus}\n\nSOURCE:\n${source}`;
 }
 
-// ─── Quiz ────────────────────────────────────────────────────────────────────
-
 export const QUIZ_SYSTEM = `You write multiple-choice questions from SOURCE excerpts only.
 
 Grounding: Each question must be answerable from SOURCE alone. No trick questions, no trivia outside SOURCE.
@@ -52,8 +42,6 @@ export function buildQuizUser(topic: string, count: number, source: string): str
   return `${focus}\nCount: exactly ${count} questions.\n\nSOURCE:\n${source}`;
 }
 
-// ─── Chat ────────────────────────────────────────────────────────────────────
-
 export const CHAT_SYSTEM = `You are a document tutor. Answer using SOURCE only.
 
 Rules:
@@ -66,7 +54,6 @@ export function buildChatSystemWithSource(source: string): string {
   return `${CHAT_SYSTEM}\n\nSOURCE:\n${source}`;
 }
 
-/** Trim long prior turns to control token use in multi-turn chat. */
 export function trimChatHistory(
   history: Array<{ role: 'user' | 'assistant'; content: string }>,
   maxTurns = 6,

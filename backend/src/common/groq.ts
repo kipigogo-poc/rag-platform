@@ -1,11 +1,7 @@
-/**
- * Groq Chat Completions API (OpenAI-compatible).
- * Free tier: ~30 RPM, TPM limits vary by model — see console.groq.com
- */
+import { InternalServerErrorException } from '@nestjs/common';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-/** 8B model: lower TPM use, higher free-tier headroom. Override with GROQ_MODEL. */
 export const DEFAULT_GROQ_MODEL = 'llama-3.1-8b-instant';
 
 export interface GroqMessage {
@@ -83,8 +79,8 @@ export async function callGroq(
       continue;
     }
 
-    throw new Error(`Groq API error ${res.status}: ${lastError}`);
+    throw new InternalServerErrorException(`AI service returned ${res.status}. Try again in a moment.`);
   }
 
-  throw new Error(`Groq API error 429: ${lastError}`);
+  throw new InternalServerErrorException('AI is rate-limited right now. Wait a moment, then try again.');
 }

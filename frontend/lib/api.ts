@@ -74,7 +74,7 @@ async function getBearerToken(): Promise<string> {
     return cachedToken;
   }
   const res = await fetch('/api/auth/token');
-  if (!res.ok) throw new Error('Not authenticated');
+  if (!res.ok) throw new Error('Log in to continue');
   const { token, expiresIn } = (await res.json()) as { token: string; expiresIn: number };
   cachedToken = token;
   tokenExpiresAt = Date.now() + expiresIn * 1000;
