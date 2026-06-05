@@ -4,48 +4,27 @@
 
 @layer base {
   :root {
-    --background: 210 33% 99%;
-    --foreground: 15 25% 16%;
-    --card: 0 0% 100%;
-    --card-foreground: 15 25% 16%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 15 25% 16%;
-    --primary: 226 87% 31%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 208 47% 96%;
-    --secondary-foreground: 15 25% 16%;
-    --muted: 210 33% 96%;
-    --muted-foreground: 208 20% 42%;
-    --accent: 208 47% 94%;
-    --accent-foreground: 226 87% 31%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 226 87% 31%;
-    --radius: 0.375rem;
-  }
-
-  .dark {
-    --background: 226 40% 8%;
-    --foreground: 210 33% 96%;
-    --card: 226 35% 10%;
-    --card-foreground: 210 33% 96%;
-    --popover: 226 35% 10%;
-    --popover-foreground: 210 33% 96%;
+    --background: 226 42% 6%;
+    --foreground: 210 28% 93%;
+    --card: 226 36% 10%;
+    --card-foreground: 210 28% 93%;
+    --popover: 226 36% 10%;
+    --popover-foreground: 210 28% 93%;
     --primary: 208 47% 56%;
-    --primary-foreground: 226 87% 12%;
-    --secondary: 226 30% 16%;
-    --secondary-foreground: 210 33% 96%;
-    --muted: 226 30% 16%;
-    --muted-foreground: 208 20% 65%;
-    --accent: 226 30% 18%;
-    --accent-foreground: 210 33% 96%;
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 210 33% 96%;
-    --border: 226 25% 20%;
-    --input: 226 25% 20%;
+    --primary-foreground: 226 87% 10%;
+    --secondary: 226 28% 14%;
+    --secondary-foreground: 210 28% 93%;
+    --muted: 226 28% 14%;
+    --muted-foreground: 208 16% 62%;
+    --accent: 226 30% 16%;
+    --accent-foreground: 210 28% 93%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 28% 93%;
+    --border: 226 22% 18%;
+    --input: 226 22% 18%;
     --ring: 208 47% 56%;
+    --radius: 0.375rem;
+    color-scheme: dark;
   }
 }
 
@@ -54,7 +33,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-cocoa;
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -84,9 +63,9 @@
     @apply absolute inset-0;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(255, 255, 255, 0.86) 55%,
-      rgba(248, 250, 252, 0.92) 100%
+      rgba(8, 12, 24, 0.94) 0%,
+      rgba(12, 20, 38, 0.88) 55%,
+      rgba(6, 10, 20, 0.96) 100%
     );
   }
 }

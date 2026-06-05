@@ -33,7 +33,7 @@ export function TelegramConnect() {
   }
 
   return (
-    <div className="rounded-md border border-gray-200 bg-card p-6 space-y-4 shadow-sm">
+    <div className="rounded-md border border-border bg-card p-6 space-y-4 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="shrink-0 flex h-9 w-9 items-center justify-center rounded-md bg-danube/15">
           <svg viewBox="0 0 24 24" className="h-5 w-5 fill-danube">
@@ -41,8 +41,8 @@ export function TelegramConnect() {
           </svg>
         </div>
         <div>
-          <p className="text-sm font-semibold text-torea">Telegram</p>
-          <p className="text-xs text-cocoa/60 mt-0.5 leading-relaxed">
+          <p className="text-sm font-semibold text-danube">Telegram</p>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
             Chat with your docs on the go.
           </p>
         </div>
@@ -70,17 +70,17 @@ export function TelegramConnect() {
                 href="https://t.me/YourBotUsername"
                 target="_blank"
                 rel="noreferrer"
-                className="text-torea underline underline-offset-2 inline-flex items-center gap-0.5 hover:text-danube transition-colors"
+                className="text-danube underline underline-offset-2 inline-flex items-center gap-0.5 hover:text-danube transition-colors"
               >
                 your bot <ExternalLink className="h-2.5 w-2.5" />
               </a>{' '}
               and send:
             </p>
-            <div className="flex items-center gap-2 rounded-md bg-danube/8 border border-gray-200 px-3 py-2">
-              <code className="text-xs flex-1 font-mono truncate text-cocoa">/link {token}</code>
+            <div className="flex items-center gap-2 rounded-md bg-danube/8 border border-border px-3 py-2">
+              <code className="text-xs flex-1 font-mono truncate text-foreground">/link {token}</code>
               <button
                 onClick={copy}
-                className="shrink-0 text-danube hover:text-torea transition-colors"
+                className="shrink-0 text-danube hover:text-danube transition-colors"
                 title="Copy command"
               >
                 {state === 'copied'
@@ -89,16 +89,16 @@ export function TelegramConnect() {
               </button>
             </div>
           </div>
-          <p className="text-[11px] text-cocoa/60">
+          <p className="text-[11px] text-muted-foreground">
             Expires in 15 min.{' '}
-            <button onClick={generate} className="text-danube underline hover:text-torea transition-colors">
+            <button onClick={generate} className="text-danube underline hover:text-danube transition-colors">
               Grab another
             </button>
           </p>
         </div>
       )}
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }

@@ -112,14 +112,14 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
   }
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col gap-2 pr-6 border-r border-gray-200 min-h-[400px]">
+    <aside className="flex w-56 shrink-0 flex-col gap-2 pr-6 border-r border-border min-h-[400px]">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cocoa/60">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Subjects
         </span>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 hover:border-danube hover:bg-danube/10 transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-border hover:border-danube hover:bg-danube/10 transition-colors"
           title="Add subject"
         >
           <Plus className="h-3.5 w-3.5 text-danube" />
@@ -127,7 +127,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="mb-3 space-y-3 animate-fade-in p-4 rounded-md border border-gray-200 bg-white shadow-sm">
+        <form onSubmit={handleCreate} className="mb-3 space-y-3 animate-fade-in p-4 rounded-md border border-border bg-card shadow-sm">
           <Input
             ref={inputRef}
             value={newName}
@@ -169,13 +169,13 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-xs text-cocoa/60 py-3">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground py-3">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading…
         </div>
       ) : subjects.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-10 text-center px-4">
           <BookOpen className="h-8 w-8 text-danube/40" />
-          <p className="text-xs text-cocoa/60 leading-relaxed">No subjects yet.<br />Hit + to add one.</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">No subjects yet.<br />Hit + to add one.</p>
         </div>
       ) : (
         <ul className="space-y-0.5">
@@ -200,8 +200,8 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
                   className={cn(
                     'group flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors text-sm',
                     activeSubjectId === subject.id
-                      ? 'bg-danube/15 border border-danube/30 font-medium text-torea'
-                      : 'hover:bg-danube/8 text-cocoa/70 hover:text-cocoa border border-transparent',
+                      ? 'bg-danube/15 border border-danube/30 font-medium text-danube'
+                      : 'hover:bg-danube/8 text-muted-foreground hover:text-foreground border border-transparent',
                   )}
                   onClick={() => onSelect(subject)}
                 >

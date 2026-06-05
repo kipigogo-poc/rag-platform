@@ -23,10 +23,10 @@ interface QuizCardProps {
 }
 
 const OPTION_COLORS = {
-  correct: 'border-emerald-500 bg-emerald-50 text-emerald-900',
-  wrong: 'border-red-400 bg-red-50 text-red-900',
-  selected: 'border-torea bg-danube/10 text-cocoa',
-  default: 'border-gray-200 hover:border-danube hover:bg-danube/5 text-cocoa',
+  correct: 'border-emerald-600 bg-emerald-950/50 text-emerald-200',
+  wrong: 'border-red-600 bg-red-950/50 text-red-200',
+  selected: 'border-danube bg-danube/15 text-foreground',
+  default: 'border-border hover:border-danube hover:bg-danube/10 text-foreground',
 } as const;
 
 export function QuizCard({
@@ -67,12 +67,12 @@ export function QuizCard({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex items-center justify-between text-xs text-cocoa/60">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <BookOpen className="h-3.5 w-3.5 text-danube" />
           {fileName}
         </span>
-        <Badge variant="outline" className="border-gray-200">
+        <Badge variant="outline" className="border-border">
           {questionIndex + 1} / {totalQuestions}
         </Badge>
       </div>
@@ -80,9 +80,9 @@ export function QuizCard({
       <Progress value={progress} />
 
       {/* Question card */}
-      <Card className="border-gray-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardHeader className="pb-5">
-          <CardTitle className="text-lg leading-snug text-torea">{question.question}</CardTitle>
+          <CardTitle className="text-lg leading-snug text-danube">{question.question}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {question.options.map((option) => (
@@ -118,8 +118,8 @@ export function QuizCard({
           className={cn(
             'rounded-md border px-4 py-3 text-sm animate-fade-in',
             isCorrect
-              ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
-              : 'border-red-300 bg-red-50 text-red-900',
+              ? 'border-emerald-700 bg-emerald-950/50 text-emerald-200'
+              : 'border-red-700 bg-red-950/50 text-red-200',
           )}
         >
           <div className="flex items-center gap-2 font-semibold mb-1">
@@ -139,7 +139,7 @@ export function QuizCard({
           ) : (
             <button
               onClick={() => setShowExplanation(true)}
-              className="text-xs text-danube underline underline-offset-2 hover:text-torea transition-colors"
+              className="text-xs text-danube underline underline-offset-2 hover:text-danube transition-colors"
             >
               Why?
             </button>

@@ -61,15 +61,15 @@ export function LoginScreen() {
               R
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-torea">RAG Quiz</h1>
-          <p className="text-sm text-cocoa/70 leading-relaxed">
+          <h1 className="text-3xl font-bold tracking-tight text-danube">RAG Quiz</h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Upload docs. Get notes, quizzes, and chat — by subject.
           </p>
         </div>
 
-        <Card className="border-gray-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-base text-torea">Log in</CardTitle>
+            <CardTitle className="text-base text-danube">Log in</CardTitle>
             <CardDescription>Google or GitHub. No password.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -103,7 +103,7 @@ export function LoginScreen() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-cocoa/60 leading-relaxed">
+        <p className="text-center text-xs text-muted-foreground leading-relaxed">
           We store subjects and sessions — not your raw files forever.
         </p>
       </div>

@@ -62,15 +62,15 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-[580px] rounded-md border border-gray-200 overflow-hidden shadow-sm">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-200 bg-danube/8 shrink-0">
-        <Bot className="h-4 w-4 text-torea" />
-        <span className="text-sm font-medium text-cocoa">Ask your doc</span>
-        <span className="text-xs text-cocoa/60 ml-1 truncate">— {fileName}</span>
+    <div className="flex flex-col h-[580px] rounded-md border border-border overflow-hidden shadow-sm">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-border bg-danube/8 shrink-0">
+        <Bot className="h-4 w-4 text-danube" />
+        <span className="text-sm font-medium text-foreground">Ask your doc</span>
+        <span className="text-xs text-muted-foreground ml-1 truncate">— {fileName}</span>
         {history.length > 0 && (
           <button
             onClick={() => setHistory([])}
-            className="ml-auto flex items-center gap-1 text-xs text-danube hover:text-torea transition-colors"
+            className="ml-auto flex items-center gap-1 text-xs text-danube hover:text-danube transition-colors"
           >
             <RotateCcw className="h-3 w-3" />
             Start over
@@ -85,8 +85,8 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
               <Bot className="h-6 w-6 text-danube" />
             </div>
             <div>
-              <p className="text-sm font-medium text-torea">Ask anything in this doc</p>
-              <p className="text-xs text-cocoa/60 mt-1 leading-relaxed">
+              <p className="text-sm font-medium text-danube">Ask anything in this doc</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 Answers come straight from your upload.
               </p>
             </div>
@@ -99,7 +99,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
                 <button
                   key={s}
                   onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                  className="text-xs rounded-md border border-gray-200 px-3 py-1.5 text-cocoa hover:bg-danube/10 hover:border-danube transition-colors"
+                  className="text-xs rounded-md border border-border px-3 py-1.5 text-foreground hover:bg-danube/10 hover:border-danube transition-colors"
                 >
                   {s}
                 </button>
@@ -121,7 +121,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
                 'shrink-0 flex h-7 w-7 items-center justify-center rounded-full mt-0.5',
                 turn.role === 'user'
                   ? 'bg-torea text-white'
-                  : 'bg-danube/10 border border-gray-200',
+                  : 'bg-danube/10 border border-border',
               )}
             >
               {turn.role === 'user'
@@ -134,7 +134,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
                 'max-w-[78%] rounded-md px-4 py-2.5 text-sm leading-relaxed',
                 turn.role === 'user'
                   ? 'bg-torea text-white rounded-tr-sm'
-                  : 'bg-white border border-gray-200 text-cocoa rounded-tl-sm',
+                  : 'bg-card border border-border text-foreground rounded-tl-sm',
               )}
             >
               {turn.content}
@@ -144,10 +144,10 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
 
         {loading && (
           <div className="flex gap-2.5 animate-fade-in">
-            <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-danube/10 border border-gray-200">
+            <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-danube/10 border border-border">
               <Bot className="h-3.5 w-3.5 text-danube" />
             </div>
-            <div className="bg-white border border-gray-200 rounded-md rounded-tl-sm px-4 py-3">
+            <div className="bg-card border border-border rounded-md rounded-tl-sm px-4 py-3">
               <Loader2 className="h-4 w-4 animate-spin text-danube" />
             </div>
           </div>
@@ -156,7 +156,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 border-t border-gray-200 px-4 py-4">
+      <div className="shrink-0 border-t border-border px-4 py-4">
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -165,7 +165,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
             onKeyDown={handleKey}
             placeholder="What tripped you up in this chapter?"
             disabled={loading}
-            className="flex-1 h-10 rounded-md border border-gray-200 bg-background px-3 text-sm text-cocoa placeholder:text-cocoa/40 focus:outline-none focus:ring-2 focus:ring-torea disabled:opacity-50"
+            className="flex-1 h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-torea disabled:opacity-50"
           />
           <Button
             size="sm"

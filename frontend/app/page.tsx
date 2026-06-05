@@ -161,13 +161,13 @@ export default function HomePage() {
               {/* Subject header */}
               <div className="flex items-center gap-3 mb-6">
                 <span className="h-3 w-3 rounded-full shrink-0 ring-2 ring-white shadow-sm" style={{ backgroundColor: activeSubject.color }} />
-                <h2 className="text-xl font-semibold tracking-tight text-torea">{activeSubject.name}</h2>
+                <h2 className="text-xl font-semibold tracking-tight text-danube">{activeSubject.name}</h2>
                 <div className="ml-auto flex items-center gap-3">
                   {sessions.filter((s) => !s.sessionId.startsWith('consolidated-')).length >= 2 && (
                     <button
                       onClick={handleConsolidate}
                       disabled={consolidating}
-                      className="flex items-center gap-1.5 rounded-md border border-danube/40 bg-danube/10 px-3 py-1.5 text-xs font-medium text-torea hover:bg-danube/20 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 rounded-md border border-danube/40 bg-danube/10 px-3 py-1.5 text-xs font-medium text-danube hover:bg-danube/20 transition-colors disabled:opacity-50"
                     >
                       {consolidating ? (
                         <><div className="h-3 w-3 rounded-full border-2 border-torea border-t-transparent animate-spin" />Consolidating…</>
@@ -195,8 +195,8 @@ export default function HomePage() {
                         className={cn(
                           'flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
                           s.sessionId === activeSessionId
-                            ? 'border-torea bg-torea/10 text-torea'
-                            : 'border-gray-200 text-cocoa/70 hover:border-danube hover:text-cocoa',
+                            ? 'border-danube bg-danube/15 text-danube'
+                            : 'border-border text-muted-foreground hover:border-danube hover:text-foreground',
                         )}
                       >
                         <span>📄</span>
@@ -213,7 +213,7 @@ export default function HomePage() {
                             if (!next) setShowUpload(true);
                           }
                         }}
-                        className="text-cocoa/50 hover:text-red-600 transition-colors text-xs px-1"
+                        className="text-muted-foreground/70 hover:text-red-600 transition-colors text-xs px-1"
                       >
                         ×
                       </button>
@@ -224,7 +224,7 @@ export default function HomePage() {
 
               {/* Upload zone — shown when no sessions yet, or when toggled */}
               {loadingsessions ? (
-                <div className="flex items-center justify-center py-16 gap-3 text-sm text-cocoa/60 animate-fade-in">
+                <div className="flex items-center justify-center py-16 gap-3 text-sm text-muted-foreground animate-fade-in">
                   <div className="h-4 w-4 rounded-full border-2 border-torea border-t-transparent animate-spin" />
                   Loading docs…
                 </div>
@@ -238,7 +238,7 @@ export default function HomePage() {
               {content && (
                 <>
                   {/* Content tabs */}
-                  <div className="flex gap-1 border-b border-gray-200 mb-8">
+                  <div className="flex gap-1 border-b border-border mb-8">
                     <TabButton
                       active={activeTab === 'notes'}
                       onClick={() => { setActiveTab('notes'); }}
@@ -322,8 +322,8 @@ function TabButton({ active, onClick, icon, label }: {
       className={cn(
         'flex items-center gap-1.5 px-5 py-3 text-sm font-medium border-b-2 transition-colors -mb-px',
         active
-          ? 'border-torea text-torea'
-          : 'border-transparent text-cocoa/60 hover:text-cocoa hover:border-gray-200',
+          ? 'border-danube text-danube'
+          : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
       )}
     >
       {icon}
@@ -338,7 +338,7 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
   onToggleMenu: () => void;
 }) {
   return (
-    <header className="parallax-hero sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm">
+    <header className="parallax-hero sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm shadow-sm">
       <div
         className="parallax-layer absolute inset-0 -z-20 opacity-60"
         style={{ backgroundImage: `url(${ASSETS.images.headerTexture})` }}
@@ -348,20 +348,20 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
       <div className="relative container mx-auto flex h-16 items-center px-4 max-w-5xl">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-torea text-white text-xs font-bold tracking-tight shadow-sm">R</div>
-          <span className="font-semibold tracking-tight text-torea">RAG Quiz</span>
-          <span className="hidden sm:inline-block rounded-md border border-danube/30 bg-danube/10 px-2.5 py-0.5 text-[10px] font-medium text-torea">
+          <span className="font-semibold tracking-tight text-danube">RAG Quiz</span>
+          <span className="hidden sm:inline-block rounded-md border border-danube/30 bg-danube/10 px-2.5 py-0.5 text-[10px] font-medium text-danube">
             Groq · Llama 3.3
           </span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           <a href="/architecture"
-            className="hidden sm:inline-flex items-center gap-1 text-xs text-cocoa/70 hover:text-torea transition-colors border border-gray-200 rounded-md px-3 py-1.5 hover:border-danube">
+            className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-torea transition-colors border border-border rounded-md px-3 py-1.5 hover:border-danube">
             Architecture
           </a>
           {session?.user ? (
             <div className="relative">
               <button onClick={onToggleMenu}
-                className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-cocoa hover:border-danube hover:bg-danube/5 transition-colors">
+                className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-foreground hover:border-danube hover:bg-danube/5 transition-colors">
                 {session.user.image
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={session.user.image} alt="" className="h-5 w-5 rounded-md" />
@@ -372,17 +372,17 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
                 <ChevronDown className="h-3 w-3 text-danube" />
               </button>
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-64 rounded-md border border-gray-200 bg-white shadow-sm z-50 animate-fade-in">
-                  <div className="px-4 py-3 border-b border-gray-200">
-                    <p className="text-xs font-medium truncate text-cocoa">{session.user.name}</p>
-                    <p className="text-xs text-cocoa/60 truncate">{session.user.email}</p>
+                <div className="absolute right-0 top-full mt-1 w-64 rounded-md border border-border bg-card shadow-sm z-50 animate-fade-in">
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-xs font-medium truncate text-foreground">{session.user.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
                   </div>
                   <div className="p-3">
                     <TelegramConnect />
                   </div>
-                  <div className="border-t border-gray-200">
+                  <div className="border-t border-border">
                     <button onClick={() => signOut({ callbackUrl: '/' })}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-950/40 transition-colors">
                       <LogOut className="h-3.5 w-3.5" />Log out
                     </button>
                   </div>
@@ -398,7 +398,7 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
 
 function AppFooter() {
   return (
-    <footer className="border-t border-gray-200 py-8 text-center text-xs text-cocoa/60 mt-auto leading-relaxed">
+    <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground mt-auto leading-relaxed">
       Built with Next.js · NestJS · Groq · Jina · Supabase pgvector
     </footer>
   );
@@ -407,12 +407,12 @@ function AppFooter() {
 function EmptySubjectState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-6 text-center animate-fade-in">
-      <div className="flex h-16 w-16 items-center justify-center rounded-md border border-gray-200 bg-danube/5 shadow-sm">
+      <div className="flex h-16 w-16 items-center justify-center rounded-md border border-border bg-danube/5 shadow-sm">
         <span className="text-2xl">📚</span>
       </div>
       <div>
-        <p className="font-medium text-sm text-torea tracking-tight">Pick a subject</p>
-        <p className="text-xs text-cocoa/60 mt-2 leading-relaxed">
+        <p className="font-medium text-sm text-danube tracking-tight">Pick a subject</p>
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
           Use the sidebar — or hit + to make one.
         </p>
       </div>

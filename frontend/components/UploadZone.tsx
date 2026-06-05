@@ -86,7 +86,7 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
     <div className="animate-fade-in space-y-6">
       <Card
         className={cn(
-          'border-2 border-dashed border-gray-200 transition-all duration-200 cursor-pointer shadow-sm',
+          'border-2 border-dashed border-border transition-all duration-200 cursor-pointer shadow-sm',
           state === 'dragging' && 'border-torea bg-danube/10 scale-[1.01]',
           !isLoading && state !== 'dragging' && 'hover:border-danube hover:bg-danube/5',
           isLoading && 'pointer-events-none opacity-70',
@@ -100,11 +100,11 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
           {selectedFile ? (
             <>
               <div className="flex h-14 w-14 items-center justify-center rounded-md bg-danube/15">
-                <FileText className="h-7 w-7 text-torea" />
+                <FileText className="h-7 w-7 text-danube" />
               </div>
               <div>
-                <p className="font-semibold text-sm text-cocoa">{selectedFile.name}</p>
-                <p className="text-xs text-cocoa/60 mt-0.5">
+                <p className="font-semibold text-sm text-foreground">{selectedFile.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {(selectedFile.size / 1024).toFixed(1)} KB
                 </p>
               </div>
@@ -113,12 +113,12 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
           ) : (
             <>
               <div className="flex h-14 w-14 items-center justify-center rounded-md bg-danube/15">
-                <UploadCloud className="h-7 w-7 text-torea" />
+                <UploadCloud className="h-7 w-7 text-danube" />
               </div>
               <div>
-                <p className="font-medium text-sm text-cocoa">Drop a PDF or TXT</p>
-                <p className="text-xs text-cocoa/60 mt-1">
-                  or <span className="text-torea underline underline-offset-2">pick a file</span> · 20 MB max
+                <p className="font-medium text-sm text-foreground">Drop a PDF or TXT</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  or <span className="text-danube underline underline-offset-2">pick a file</span> · 20 MB max
                 </p>
               </div>
             </>
@@ -134,20 +134,20 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
       />
 
       {selectedFile && !isLoading && (
-        <Card className="animate-fade-in border-gray-200">
+        <Card className="animate-fade-in border-border">
           <CardContent className="pt-8 space-y-5">
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-cocoa w-36 shrink-0">Questions</label>
+              <label className="text-sm font-medium text-foreground w-36 shrink-0">Questions</label>
               <input type="range" min={1} max={20} value={questionCount}
                 onChange={(e) => setQuestionCount(Number(e.target.value))}
                 className="flex-1 accent-torea" />
-              <span className="w-6 text-center text-sm font-bold text-torea">{questionCount}</span>
+              <span className="w-6 text-center text-sm font-bold text-danube">{questionCount}</span>
             </div>
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-cocoa w-36 shrink-0">Topic</label>
+              <label className="text-sm font-medium text-foreground w-36 shrink-0">Topic</label>
               <input type="text" placeholder="AWS IAM roles"
                 value={topic} onChange={(e) => setTopic(e.target.value)}
-                className="flex-1 h-9 rounded-md border border-gray-200 bg-background px-3 text-sm text-cocoa placeholder:text-cocoa/40 focus:outline-none focus:ring-2 focus:ring-torea" />
+                className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-torea" />
             </div>
           </CardContent>
         </Card>
@@ -160,9 +160,9 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
               {i < stepIndex
                 ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                 : i === stepIndex
-                ? <Loader2 className="h-4 w-4 text-torea animate-spin shrink-0" />
-                : <div className="h-4 w-4 rounded-full border border-gray-200 shrink-0" />}
-              <span className={cn(i === stepIndex ? 'text-cocoa' : 'text-cocoa/50')}>
+                ? <Loader2 className="h-4 w-4 text-danube animate-spin shrink-0" />
+                : <div className="h-4 w-4 rounded-full border border-border shrink-0" />}
+              <span className={cn(i === stepIndex ? 'text-foreground' : 'text-muted-foreground/70')}>
                 {step.label}
               </span>
             </div>
@@ -171,8 +171,8 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
       )}
 
       {error && (
-        <div className="flex items-center gap-2 rounded-md border border-shilo/50 bg-shilo/10 px-4 py-3 text-sm text-cocoa animate-fade-in">
-          <AlertCircle className="h-4 w-4 shrink-0 text-torea" />
+        <div className="flex items-center gap-2 rounded-md border border-shilo/50 bg-shilo/10 px-4 py-3 text-sm text-foreground animate-fade-in">
+          <AlertCircle className="h-4 w-4 shrink-0 text-danube" />
           {error}
         </div>
       )}

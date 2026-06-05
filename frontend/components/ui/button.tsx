@@ -9,10 +9,10 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-torea text-white hover:bg-torea/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-gray-200 bg-background text-cocoa hover:border-danube hover:bg-danube/10 hover:text-torea',
-        secondary: 'bg-danube/15 text-torea hover:bg-danube/25',
-        ghost: 'text-cocoa hover:bg-danube/10 hover:text-torea',
-        link: 'text-torea underline-offset-4 hover:text-danube hover:underline',
+        outline: 'border border-border bg-background text-foreground hover:border-danube hover:bg-danube/10 hover:text-danube',
+        secondary: 'bg-danube/15 text-danube hover:bg-danube/25',
+        ghost: 'text-foreground hover:bg-danube/10 hover:text-danube',
+        link: 'text-danube underline-offset-4 hover:text-danube hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',
