@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Bot, User, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Icon, IconSpinner } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { apiClient } from '@/lib/api';
 
@@ -64,7 +64,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
   return (
     <div className="flex flex-col h-[580px] rounded-md border border-border overflow-hidden shadow-sm">
       <div className="flex items-center gap-2 px-5 py-4 border-b border-border bg-danube/8 shrink-0">
-        <Bot className="h-4 w-4 text-danube" />
+        <Icon name="smart_toy" className="text-danube" size={16} />
         <span className="text-sm font-medium text-foreground">Ask your doc</span>
         <span className="text-xs text-muted-foreground ml-1 truncate">— {fileName}</span>
         {history.length > 0 && (
@@ -72,7 +72,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
             onClick={() => setHistory([])}
             className="ml-auto flex items-center gap-1 text-xs text-danube hover:text-danube transition-colors"
           >
-            <RotateCcw className="h-3 w-3" />
+            <Icon name="restart_alt" size={12} />
             Start over
           </button>
         )}
@@ -82,7 +82,7 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
         {history.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-center animate-fade-in">
             <div className="flex h-12 w-12 items-center justify-center rounded-md bg-danube/15">
-              <Bot className="h-6 w-6 text-danube" />
+              <Icon name="smart_toy" className="text-danube" size={24} />
             </div>
             <div>
               <p className="text-sm font-medium text-danube">Ask anything in this doc</p>
@@ -125,8 +125,8 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
               )}
             >
               {turn.role === 'user'
-                ? <User className="h-3.5 w-3.5" />
-                : <Bot className="h-3.5 w-3.5 text-danube" />}
+                ? <Icon name="person" size={14} className="text-white" />
+                : <Icon name="smart_toy" size={14} className="text-danube" />}
             </div>
 
             <div
@@ -145,10 +145,10 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
         {loading && (
           <div className="flex gap-2.5 animate-fade-in">
             <div className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-danube/10 border border-border">
-              <Bot className="h-3.5 w-3.5 text-danube" />
+              <Icon name="smart_toy" size={14} className="text-danube" />
             </div>
             <div className="bg-card border border-border rounded-md rounded-tl-sm px-4 py-3">
-              <Loader2 className="h-4 w-4 animate-spin text-danube" />
+              <IconSpinner className="text-danube" size={16} />
             </div>
           </div>
         )}
@@ -174,8 +174,8 @@ export function ChatPanel({ sessionId, subjectId, fileName }: ChatPanelProps) {
             className="h-10 w-10 p-0 shrink-0"
           >
             {loading
-              ? <Loader2 className="h-4 w-4 animate-spin" />
-              : <Send className="h-4 w-4" />}
+              ? <IconSpinner size={16} />
+              : <Icon name="send" size={16} />}
           </Button>
         </div>
       </div>

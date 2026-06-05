@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Plus, Check, Trash2, Pencil, Loader2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Icon, IconSpinner } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { apiClient } from '@/lib/api';
 
@@ -43,6 +43,8 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
 
   useEffect(() => {
     fetchSubjects();
+    // Mount-only load; including fetchSubjects would re-fetch on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -122,7 +124,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
           className="flex h-7 w-7 items-center justify-center rounded-md border border-border hover:border-danube hover:bg-danube/10 transition-colors"
           title="Add subject"
         >
-          <Plus className="h-3.5 w-3.5 text-danube" />
+          <Icon name="add" className="text-danube" size={14} />
         </button>
       </div>
 
@@ -144,7 +146,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
                 onClick={() => setNewColor(c)}
                 className={cn(
                   'h-5 w-5 rounded-full border-2 transition-transform',
-                  newColor === c ? 'border-torea scale-110' : 'border-transparent',
+                  newColor === c ? 'border-danube scale-110' : 'border-transparent',
                 )}
                 style={{ backgroundColor: c }}
                 title={c}
@@ -153,7 +155,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
           </div>
           <div className="flex gap-2">
             <Button type="submit" size="sm" className="flex-1 gap-1" disabled={creating || !newName.trim()}>
-              {creating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              {creating ? <IconSpinner size={12} /> : <Icon name="check" size={12} />}
               Add
             </Button>
             <Button
@@ -170,11 +172,11 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
 
       {loading ? (
         <div className="flex items-center gap-2 text-xs text-muted-foreground py-3">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading…
+          <IconSpinner size={14} /> Loading…
         </div>
       ) : subjects.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-10 text-center px-4">
-          <BookOpen className="h-8 w-8 text-danube/40" />
+          <Icon name="menu_book" className="text-danube/40" size={32} />
           <p className="text-xs text-muted-foreground leading-relaxed">No subjects yet.<br />Hit + to add one.</p>
         </div>
       ) : (
@@ -220,7 +222,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
                       className="p-0.5 rounded hover:bg-background/80"
                       title="Rename"
                     >
-                      <Pencil className="h-3 w-3" />
+                      <Icon name="edit" size={12} />
                     </button>
                     <button
                       onClick={(e) => {
@@ -230,7 +232,7 @@ export function SubjectSidebar({ activeSubjectId, onSelect }: SubjectSidebarProp
                       className="p-0.5 rounded hover:bg-destructive/20 hover:text-destructive"
                       title="Remove"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Icon name="delete" size={12} />
                     </button>
                   </div>
                 </div>

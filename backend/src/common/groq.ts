@@ -51,7 +51,7 @@ export async function callGroq(
     body.response_format = { type: 'json_object' };
   }
 
-  let lastError = '';
+  let lastError: string | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const res = await fetch(GROQ_URL, {
@@ -79,8 +79,12 @@ export async function callGroq(
       continue;
     }
 
-    throw new InternalServerErrorException(`AI service returned ${res.status}. Try again in a moment.`);
+    throw new InternalServerErrorException(
+      `AI service returned ${res.status}. Try again in a moment.`,
+    );
   }
 
-  throw new InternalServerErrorException('AI is rate-limited right now. Wait a moment, then try again.');
+  throw new InternalServerErrorException(
+    `AI is rate-limited right now. Wait a moment, then try again.${lastError ? ` (${lastError.slice(0, 120)})` : ''}`,
+  );
 }

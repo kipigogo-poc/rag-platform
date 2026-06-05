@@ -1,9 +1,9 @@
 'use client';
 
-import { BookOpen, Lightbulb, List, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import type { Notes } from '@/lib/api';
 
 interface NotesViewProps {
@@ -19,7 +19,7 @@ export function NotesView({ notes, fileName, onReset }: NotesViewProps) {
         <div>
           <h2 className="text-2xl font-bold leading-snug tracking-tight text-danube">{notes.title}</h2>
           <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
-            <BookOpen className="h-3.5 w-3.5 text-danube" />
+            <Icon name="menu_book" className="text-danube" size={14} />
             {fileName}
           </div>
         </div>
@@ -37,7 +37,7 @@ export function NotesView({ notes, fileName, onReset }: NotesViewProps) {
       <Card className="border-border shadow-sm">
         <CardHeader className="pb-4">
           <CardTitle className="text-base flex items-center gap-2 text-danube">
-            <Lightbulb className="h-4 w-4 text-danube" />
+            <Icon name="lightbulb" className="text-danube" size={16} />
             Key takeaways
           </CardTitle>
         </CardHeader>
@@ -45,7 +45,7 @@ export function NotesView({ notes, fileName, onReset }: NotesViewProps) {
           <ul className="space-y-3">
             {notes.keyPoints.map((point, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm text-foreground leading-relaxed">
-                <ChevronRight className="h-4 w-4 shrink-0 text-danube mt-0.5" />
+                <Icon name="chevron_right" className="text-danube mt-0.5" size={16} />
                 <span>{point}</span>
               </li>
             ))}
@@ -55,7 +55,7 @@ export function NotesView({ notes, fileName, onReset }: NotesViewProps) {
 
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          <List className="h-3.5 w-3.5 text-danube" />
+          <Icon name="list" className="text-danube" size={14} />
           Deep dive
         </div>
         {notes.sections.map((section, i) => (

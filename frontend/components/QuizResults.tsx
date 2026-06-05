@@ -1,10 +1,10 @@
 'use client';
 
-import { CheckCircle2, XCircle, RefreshCcw, UploadCloud, Trophy, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import type { Quiz } from '@/lib/api';
 
@@ -38,7 +38,7 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
         <CardContent className="py-10 space-y-5">
           <div className="flex justify-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-md bg-danube/15">
-              <Trophy className="h-9 w-9 text-danube" />
+              <Icon name="emoji_events" className="text-danube" size={36} />
             </div>
           </div>
           <div>
@@ -52,13 +52,12 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
           </div>
           <Progress value={percentage} className="h-3 max-w-xs mx-auto" />
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <BookOpen className="h-3.5 w-3.5 text-danube" />
+            <Icon name="menu_book" className="text-danube" size={14} />
             {fileName}
           </div>
         </CardContent>
       </Card>
 
-      {/* Answer review */}
       <div className="space-y-4">
         <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
           Answer breakdown
@@ -72,9 +71,9 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">
                     {isCorrect ? (
-                      <CheckCircle2 className="h-5 w-5 text-danube" />
+                      <Icon name="check_circle" className="text-danube" size={20} filled />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-500" />
+                      <Icon name="cancel" className="text-red-400" size={20} />
                     )}
                   </div>
                   <CardTitle className="text-sm font-medium leading-snug text-foreground">
@@ -107,14 +106,13 @@ export function QuizResults({ quiz, answers, fileName, onRestart, onRetake }: Qu
         })}
       </div>
 
-      {/* Actions */}
       <div className="flex gap-3 pt-2">
         <Button variant="outline" className="flex-1 gap-2" onClick={onRetake}>
-          <RefreshCcw className="h-4 w-4" />
+          <Icon name="refresh" size={16} />
           Run it again
         </Button>
         <Button className="flex-1 gap-2" onClick={onRestart}>
-          <UploadCloud className="h-4 w-4" />
+          <Icon name="cloud_upload" size={16} />
           Upload new doc
         </Button>
       </div>

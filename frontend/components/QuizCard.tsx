@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import type { QuizQuestion } from '@/lib/api';
 
@@ -69,7 +69,7 @@ export function QuizCard({
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <BookOpen className="h-3.5 w-3.5 text-danube" />
+          <Icon name="menu_book" className="text-danube" size={14} />
           {fileName}
         </span>
         <Badge variant="outline" className="border-border">
@@ -79,7 +79,6 @@ export function QuizCard({
 
       <Progress value={progress} />
 
-      {/* Question card */}
       <Card className="border-border shadow-sm">
         <CardHeader className="pb-5">
           <CardTitle className="text-lg leading-snug text-danube">{question.question}</CardTitle>
@@ -102,17 +101,16 @@ export function QuizCard({
               </span>
               <span className="leading-relaxed">{option.text}</span>
               {isAnswered && option.label === question.correctAnswer && (
-                <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-600 self-center" />
+                <Icon name="check_circle" className="ml-auto text-emerald-400 self-center" size={16} filled />
               )}
               {isAnswered && option.label === selectedAnswer && option.label !== question.correctAnswer && (
-                <XCircle className="ml-auto h-4 w-4 shrink-0 text-red-500 self-center" />
+                <Icon name="cancel" className="ml-auto text-red-400 self-center" size={16} />
               )}
             </button>
           ))}
         </CardContent>
       </Card>
 
-      {/* Result feedback */}
       {isAnswered && (
         <div
           className={cn(
@@ -125,11 +123,11 @@ export function QuizCard({
           <div className="flex items-center gap-2 font-semibold mb-1">
             {isCorrect ? (
               <>
-                <CheckCircle2 className="h-4 w-4" /> Nailed it
+                <Icon name="check_circle" size={16} filled /> Nailed it
               </>
             ) : (
               <>
-                <XCircle className="h-4 w-4" /> Answer:{' '}
+                <Icon name="cancel" size={16} /> Answer:{' '}
                 <strong>{question.correctAnswer}</strong>
               </>
             )}
@@ -147,7 +145,6 @@ export function QuizCard({
         </div>
       )}
 
-      {/* Navigation */}
       <div className="flex gap-3">
         <Button
           variant="outline"
@@ -155,7 +152,7 @@ export function QuizCard({
           onClick={handlePrev}
           className="gap-1"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <Icon name="chevron_left" size={16} />
           Back
         </Button>
         <Button
@@ -164,7 +161,7 @@ export function QuizCard({
           onClick={handleNext}
         >
           {isLast ? 'View score' : 'Next'}
-          {!isLast && <ChevronRight className="h-4 w-4" />}
+          {!isLast && <Icon name="chevron_right" size={16} />}
         </Button>
       </div>
     </div>

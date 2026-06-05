@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, Copy, Check, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Icon, IconSpinner } from '@/components/ui/icon';
 import { apiClient } from '@/lib/api';
 
 export function TelegramConnect() {
@@ -50,13 +50,14 @@ export function TelegramConnect() {
 
       {state === 'idle' && (
         <Button variant="outline" size="sm" className="w-full gap-2" onClick={generate}>
-          <Send className="h-3.5 w-3.5" />
+          <Icon name="send" size={14} />
           Get link token
         </Button>
       )}
 
       {state === 'loading' && (
-        <Button variant="outline" size="sm" className="w-full" disabled>
+        <Button variant="outline" size="sm" className="w-full gap-2" disabled>
+          <IconSpinner size={14} />
           Generating…
         </Button>
       )}
@@ -72,7 +73,7 @@ export function TelegramConnect() {
                 rel="noreferrer"
                 className="text-danube underline underline-offset-2 inline-flex items-center gap-0.5 hover:text-danube transition-colors"
               >
-                your bot <ExternalLink className="h-2.5 w-2.5" />
+                your bot <Icon name="open_in_new" size={10} />
               </a>{' '}
               and send:
             </p>
@@ -84,8 +85,8 @@ export function TelegramConnect() {
                 title="Copy command"
               >
                 {state === 'copied'
-                  ? <Check className="h-3.5 w-3.5 text-emerald-500" />
-                  : <Copy className="h-3.5 w-3.5" />}
+                  ? <Icon name="check" className="text-emerald-400" size={14} />
+                  : <Icon name="content_copy" size={14} />}
               </button>
             </div>
           </div>

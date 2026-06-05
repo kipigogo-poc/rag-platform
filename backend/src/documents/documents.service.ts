@@ -21,6 +21,14 @@ export interface SessionMeta {
   createdAt: string;
 }
 
+interface GeminiQuotaBody {
+  error?: {
+    details?: Array<{
+      violations?: Array<{ quotaId?: string }>;
+    }>;
+  };
+}
+
 function makeEmbeddings(geminiApiKey: string, jinaApiKey: string) {
   const CALL_DELAY_MS = 100;
 
@@ -49,7 +57,11 @@ function makeEmbeddings(geminiApiKey: string, jinaApiKey: string) {
         await new Promise((r) => setTimeout(r, 3_000));
         return embedOneJina(text, retries - 1);
       }
-      throw new Error(`Jina AI fetch failed: ${err instanceof Error ? err.message : String(err)}`);
+      const wrapped = new Error(
+        `Jina AI fetch failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      (wrapped as Error & { cause?: unknown }).cause = err;
+      throw wrapped;
     }
     clearTimeout(timeoutId);
 
@@ -80,9 +92,9 @@ function makeEmbeddings(geminiApiKey: string, jinaApiKey: string) {
     });
 
     if (res.status === 429 && retries > 0) {
-      let body: { error?: { details?: Array<{ violations?: Array<{ quotaId?: string }> }> } } } = {};
+      let body: GeminiQuotaBody;
       try {
-        body = await res.json();
+        body = (await res.json()) as GeminiQuotaBody;
       } catch {
         body = {};
       }

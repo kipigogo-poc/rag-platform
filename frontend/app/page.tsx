@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { LogOut, ChevronDown, BookOpen, HelpCircle, MessageCircle } from 'lucide-react';
+import { Icon } from '@/components/ui/icon';
 import { LoginScreen } from '@/components/LoginScreen';
 import { SubjectSidebar, type Subject } from '@/components/SubjectSidebar';
 import { UploadZone } from '@/components/UploadZone';
@@ -242,19 +242,19 @@ export default function HomePage() {
                     <TabButton
                       active={activeTab === 'notes'}
                       onClick={() => { setActiveTab('notes'); }}
-                      icon={<BookOpen className="h-3.5 w-3.5" />}
+                      icon={<Icon name="menu_book" size={14} />}
                       label="Notes"
                     />
                     <TabButton
                       active={activeTab === 'quiz'}
                       onClick={() => { setActiveTab('quiz'); if (quizState === 'idle') startQuiz(); }}
-                      icon={<HelpCircle className="h-3.5 w-3.5" />}
+                      icon={<Icon name="quiz" size={14} />}
                       label={`Quiz (${content.quiz.length})`}
                     />
                     <TabButton
                       active={activeTab === 'chat'}
                       onClick={() => setActiveTab('chat')}
-                      icon={<MessageCircle className="h-3.5 w-3.5" />}
+                      icon={<Icon name="chat" size={14} />}
                       label="Chat"
                     />
                   </div>
@@ -369,7 +369,7 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
                       {(session.user.name ?? 'U')[0].toUpperCase()}
                     </div>}
                 <span className="hidden sm:inline max-w-[120px] truncate">{session.user.name}</span>
-                <ChevronDown className="h-3 w-3 text-danube" />
+                <Icon name="expand_more" className="text-danube" size={14} />
               </button>
               {userMenuOpen && (
                 <div className="absolute right-0 top-full mt-1 w-64 rounded-md border border-border bg-card shadow-sm z-50 animate-fade-in">
@@ -383,7 +383,7 @@ function AppHeader({ session, userMenuOpen, onToggleMenu }: {
                   <div className="border-t border-border">
                     <button onClick={() => signOut({ callbackUrl: '/' })}
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-950/40 transition-colors">
-                      <LogOut className="h-3.5 w-3.5" />Log out
+                      <Icon name="logout" size={14} />Log out
                     </button>
                   </div>
                 </div>

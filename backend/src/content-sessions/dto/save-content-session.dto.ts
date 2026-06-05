@@ -1,5 +1,4 @@
-import { IsString, IsUUID, IsArray, IsObject, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsUUID, IsArray, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SaveContentSessionDto {

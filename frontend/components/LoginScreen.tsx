@@ -2,7 +2,7 @@
 
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { IconSpinner } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ASSETS } from '@/lib/assets';
@@ -80,7 +80,7 @@ export function LoginScreen() {
               onClick={() => handleSignIn('google')}
             >
               {loading === 'google' ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <IconSpinner size={16} />
               ) : (
                 <GoogleIcon />
               )}
@@ -94,7 +94,7 @@ export function LoginScreen() {
               onClick={() => handleSignIn('github')}
             >
               {loading === 'github' ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <IconSpinner size={16} />
               ) : (
                 <GitHubIcon />
               )}

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { UploadCloud, FileText, Loader2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Icon, IconSpinner } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { uploadDocument, generateQuiz, generateNotes, type Quiz, type Notes } from '@/lib/api';
 
@@ -100,7 +100,7 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
           {selectedFile ? (
             <>
               <div className="flex h-14 w-14 items-center justify-center rounded-md bg-danube/15">
-                <FileText className="h-7 w-7 text-danube" />
+                <Icon name="description" className="text-danube" size={28} />
               </div>
               <div>
                 <p className="font-semibold text-sm text-foreground">{selectedFile.name}</p>
@@ -113,7 +113,7 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
           ) : (
             <>
               <div className="flex h-14 w-14 items-center justify-center rounded-md bg-danube/15">
-                <UploadCloud className="h-7 w-7 text-danube" />
+                <Icon name="cloud_upload" className="text-danube" size={28} />
               </div>
               <div>
                 <p className="font-medium text-sm text-foreground">Drop a PDF or TXT</p>
@@ -158,9 +158,9 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
           {STEPS.map((step, i) => (
             <div key={step.key} className="flex items-center gap-3 text-sm">
               {i < stepIndex
-                ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                ? <Icon name="check_circle" className="text-emerald-400" size={16} filled />
                 : i === stepIndex
-                ? <Loader2 className="h-4 w-4 text-danube animate-spin shrink-0" />
+                ? <IconSpinner className="text-danube" size={16} />
                 : <div className="h-4 w-4 rounded-full border border-border shrink-0" />}
               <span className={cn(i === stepIndex ? 'text-foreground' : 'text-muted-foreground/70')}>
                 {step.label}
@@ -172,15 +172,15 @@ export function UploadZone({ subjectId, onSuccess }: UploadZoneProps) {
 
       {error && (
         <div className="flex items-center gap-2 rounded-md border border-shilo/50 bg-shilo/10 px-4 py-3 text-sm text-foreground animate-fade-in">
-          <AlertCircle className="h-4 w-4 shrink-0 text-danube" />
+          <Icon name="error" className="text-danube" size={16} />
           {error}
         </div>
       )}
 
       <Button className="w-full gap-2" size="lg" disabled={!selectedFile || isLoading} onClick={handleSubmit}>
         {isLoading
-          ? <><Loader2 className="h-4 w-4 animate-spin" />Working…</>
-          : <><Sparkles className="h-4 w-4" />Build notes & quiz</>}
+          ? <><IconSpinner size={16} />Working…</>
+          : <><Icon name="auto_awesome" size={16} />Build notes & quiz</>}
       </Button>
     </div>
   );
